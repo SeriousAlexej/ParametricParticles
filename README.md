@@ -9,6 +9,9 @@ Advanced particle entity for the *Serious Sam - The Second Encounter 1.07*
 <img width="322" height="258" align="left" src="./Images/Particles_MovingShower.gif">
 <img width="322" height="258" src="./Images/Particles_AnimatedSprites.gif">
 
+## Video Demonstration (YouTube, clickable)
+[![Parametric Particles Demo](https://img.youtube.com/vi/x7sMZ5C2bh4/maxresdefault.jpg)](https://youtu.be/x7sMZ5C2bh4)
+
 ---
 
 1. [Introduction](#intro)
@@ -48,6 +51,11 @@ Particles are implemented with 6 new entities.
 To quickly check them out and see some examples, you can startup a **Parametric Particles - Demo Level** level from within the game.
 
 <img src="./Images/DemoLevel.png">
+
+As a short intro on how to use these entities, you can watch a video below.
+
+## Mapping Video Demonstration (YouTube, clickable)
+[![Parametric Particles Mapping Demo](https://img.youtube.com/vi/gUdtqRKgqnk/maxresdefault.jpg)](https://youtu.be/gUdtqRKgqnk)
 
 ---
 
