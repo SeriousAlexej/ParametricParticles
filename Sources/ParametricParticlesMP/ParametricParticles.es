@@ -82,11 +82,13 @@ properties:
  39 BOOL m_background "Background" = FALSE,
  40 BOOL m_help "Online Help..." = FALSE,
  41 ANIMATION m_textureAnimation "Texture animation" = 0,
+ 42 INDEX m_maxParticles "Alive particles max count" = 512,
 
 {
   Particle* lastFree;
   Particle* lastUsed;
-  Particle particles_MAX_PARTICLES;
+  CStaticArray<Particle> particles;
+  CStaticArray<Particle*> renderParticles;
   CStaticArray<FLOAT2D> alphaCache;
   CStaticArray<FLOAT2D> stretchXCache;
   CStaticArray<FLOAT2D> stretchYCache;
@@ -104,8 +106,17 @@ functions:
     return CMovableModelEntity::GetAnimData(slPropertyOffset);
   }
 
-  void RecacheGraphs()
+  void RecacheArrays()
   {
+    particles.Clear();
+    particles.New(m_maxParticles);
+    renderParticles.Clear();
+    renderParticles.New(m_maxParticles);
+    
+    for (INDEX i = 0; i < m_maxParticles; ++i) {
+      PushFree(&particles[i]);
+    }
+
     RecacheGraph(alphaCache, m_alphaGraph);
     RecacheGraph(stretchXCache, m_stretchXGraph);
     RecacheGraph(stretchYCache, m_stretchYGraph);
@@ -130,9 +141,6 @@ functions:
   {
     lastFree = NULL;
     lastUsed = NULL;
-    for (INDEX i = 0; i < MAX_PARTICLES; ++i) {
-      PushFree(&particles[i]);
-    }
   }
   
   BOOL IsTargetValid(SLONG slPropertyOffset, CEntity* penTarget)
@@ -174,7 +182,7 @@ functions:
   void Read_t(CTStream* strm)
   { 
     CMovableModelEntity::Read_t(strm);
-    RecacheGraphs();
+    RecacheArrays();
     
     strm->ExpectID_t(ID_PARAMETRIC_PARTICLES);
 
@@ -198,11 +206,11 @@ functions:
     }
 
     lastFree = NULL;
-    for (INDEX i = numActive; i < MAX_PARTICLES; ++i) {
+    for (INDEX i = numActive; i < m_maxParticles; ++i) {
       particles[i].prev = NULL;
       particles[i].next = NULL;
     }
-    for (i = numActive; i < MAX_PARTICLES; ++i) {
+    for (i = numActive; i < m_maxParticles; ++i) {
       PushFree(&particles[i]);
     }
   }
@@ -213,14 +221,16 @@ functions:
     
     strm->WriteID_t(CChunkID(ID_PARAMETRIC_PARTICLES));
 
-    Particle* activeParticles[MAX_PARTICLES];
+    CStaticArray<Particle*> activeParticles;
+    activeParticles.New(m_maxParticles);
+
     INDEX numActive = 0;
     Particle* particle = lastUsed;
     while (particle) {
       activeParticles[numActive++] = particle;
       particle = particle->prev;
     }
-    qsort(activeParticles, numActive, sizeof(Particle*), &Particle::CompareID);
+    qsort(activeParticles.sa_Array, numActive, sizeof(Particle*), &Particle::CompareID);
     (*strm) << numActive;
     for (INDEX i = 0; i < numActive; ++i) {
       activeParticles[i]->Write(strm);
@@ -314,9 +324,7 @@ functions:
       return;
     }
 
-    static Particle* renderParticles[MAX_PARTICLES];
     INDEX numParticles = 0;
-
     Particle* particle = lastUsed;
     while (particle)
     {
@@ -330,7 +338,7 @@ functions:
     g_parentLerpedPositionForComparison = lerpedPlacement.pl_PositionVector;
     MakeRotationMatrixFast(g_parentLerpedRotationForComparison, lerpedPlacement.pl_OrientationAngle);
     g_viewerLerpedPositionForComparison = Particle_GetViewer()->GetLerpedPlacement().pl_PositionVector;
-    qsort(renderParticles, numParticles, sizeof(Particle*), &Particle::CompareDistance);
+    qsort(renderParticles.sa_Array, numParticles, sizeof(Particle*), &Particle::CompareDistance);
 
     CTextureObject& to = GetModelObject()->mo_toTexture;
     Particle_PrepareTexture(&to, (ParticleBlendType)m_blendType);
@@ -396,11 +404,12 @@ functions:
     m_textureTiles = ClampDn(m_textureTiles, INDEX(1));
     m_rotationMin = Clamp(m_rotationMin, -180.0f, 180.0f);
     m_rotationMax = Clamp(m_rotationMax, m_rotationMin, 180.0f);
+    m_maxParticles = ClampDn(m_maxParticles, INDEX(1));
   }
 
   void KillParticles()
   {
-    for (INDEX i = 0; i < MAX_PARTICLES; ++i) {
+    for (INDEX i = 0; i < m_maxParticles; ++i) {
       particles[i].birthTime = -1;
       particles[i].deathTime = -1;
     }
@@ -508,7 +517,7 @@ procedures:
     EditGraphVariable(this, m_editAlpha, m_alphaGraph, LIMIT_GRAPH_X | LIMIT_GRAPH_Y);
     EditGraphVariable(this, m_editStretchX, m_stretchXGraph, LIMIT_GRAPH_X);
     EditGraphVariable(this, m_editStretchY, m_stretchYGraph, LIMIT_GRAPH_X);
-    RecacheGraphs();
+    RecacheArrays();
 
     if (m_help) {
       m_help = FALSE;

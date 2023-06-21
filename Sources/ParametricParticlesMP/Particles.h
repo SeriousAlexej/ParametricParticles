@@ -1,7 +1,6 @@
 #ifndef PARAMETRIC_PARTICLES_42_H
 #define PARAMETRIC_PARTICLES_42_H
 
-#define MAX_PARTICLES 512
 #define LIMIT_GRAPH_X 1
 #define LIMIT_GRAPH_Y 2
 
@@ -53,8 +52,6 @@ struct Particle
   TIME deathTime;
   ULONG savedRndSeed;
 };
-
-#define particles_MAX_PARTICLES particles[MAX_PARTICLES]
 
 template<typename TClass>
 BOOL EnsureNoLoops(const TClass* pthis, const TClass* pthat)
