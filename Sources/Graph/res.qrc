@@ -6,5 +6,6 @@
         <file>edit-redo.png</file>
         <file>edit-undo.png</file>
         <file>view-fullscreen.png</file>
+        <file>function.png</file>
     </qresource>
 </RCC>

@@ -24,6 +24,7 @@ private:
     void onCopy();
     void onPaste();
     void onScaleAndTranslate();
+    void onGenerateFunction();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;

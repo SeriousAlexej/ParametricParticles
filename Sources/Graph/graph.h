@@ -6,9 +6,13 @@ class Graph final : public QWidget
 {
     Q_OBJECT
 public:
+    static constexpr unsigned LIMIT_GRAPH_X = 1;
+    static constexpr unsigned LIMIT_GRAPH_Y = 2;
+
     Graph(QWidget* parent = nullptr);
     ~Graph();
 
+    void setInteractive(bool interactive);
     void undo();
     void redo();
     void fit();
@@ -46,6 +50,7 @@ private:
     QRect pointRect(size_t i) const;
 
 private:
+    bool m_interactive;
     QUndoStack m_undoStack;
     QRectF m_viewport;
     std::vector<QPointF> m_points;

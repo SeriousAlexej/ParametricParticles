@@ -22,6 +22,9 @@ mainwindow.ui
 scaletranslatedialog.cpp
 scaletranslatedialog.h
 scaletranslatedialog.ui
+functiongenerator.cpp
+functiongenerator.h
+functiongenerator.ui
 graph.cpp
 graph.h
 res.qrc

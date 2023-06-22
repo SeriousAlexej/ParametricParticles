@@ -5,12 +5,6 @@
 #include <algorithm>
 #include <QPointer>
 
-namespace
-{
-constexpr unsigned LIMIT_GRAPH_X = 1;
-constexpr unsigned LIMIT_GRAPH_Y = 2;
-}
-
 class Graph::GraphAction final : public QUndoCommand
 {
 public:
@@ -42,8 +36,8 @@ private:
 Graph::Graph(QWidget* parent)
  : QWidget(parent)
 {
+    setInteractive(true);
     m_undoStack.setUndoLimit(100);
-    setMouseTracking(true);
     setRange(0, 1, 0, 1);
     setPoints({ {0.0, 1.0} }, false);
     m_selected = -1;
@@ -56,6 +50,12 @@ Graph::Graph(QWidget* parent)
 
 Graph::~Graph()
 {
+}
+
+void Graph::setInteractive(bool interactive)
+{
+    m_interactive = interactive;
+    setMouseTracking(m_interactive);
 }
 
 void Graph::undo()
@@ -287,6 +287,9 @@ void Graph::paintEvent(QPaintEvent*)
 
 void Graph::wheelEvent(QWheelEvent* e)
 {
+    if (!m_interactive)
+        return;
+
     if (m_mode != Mode::Idle)
         return;
     const int delta = e->angleDelta().y();
@@ -306,6 +309,9 @@ void Graph::wheelEvent(QWheelEvent* e)
 
 void Graph::mouseMoveEvent(QMouseEvent* e)
 {
+    if (!m_interactive)
+        return;
+
     switch (m_mode)
     {
     case Mode::Idle:
@@ -347,6 +353,9 @@ void Graph::mouseMoveEvent(QMouseEvent* e)
 
 void Graph::mousePressEvent(QMouseEvent* e)
 {
+    if (!m_interactive)
+        return;
+
     switch (m_mode)
     {
     case Mode::Idle:
@@ -388,6 +397,9 @@ void Graph::mousePressEvent(QMouseEvent* e)
 
 void Graph::mouseReleaseEvent(QMouseEvent*)
 {
+    if (!m_interactive)
+        return;
+
     if (m_mode == Mode::MovePoint)
     {
         const auto newPoints = m_points;
@@ -399,6 +411,9 @@ void Graph::mouseReleaseEvent(QMouseEvent*)
 
 void Graph::contextMenuEvent(QContextMenuEvent* e)
 {
+    if (!m_interactive)
+        return;
+
     if (m_mode != Mode::Idle)
         return;
 

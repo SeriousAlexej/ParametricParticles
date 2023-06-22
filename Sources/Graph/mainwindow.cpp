@@ -2,6 +2,8 @@
 #include "./ui_mainwindow.h"
 #include "scaletranslatedialog.h"
 #include "./ui_scaletranslatedialog.h"
+#include "functiongenerator.h"
+#include "./ui_functiongenerator.h"
 
 #include <QDir>
 #include <QFile>
@@ -64,6 +66,7 @@ MainWindow::MainWindow(const QString& graphPath, QWidget* parent)
     connect(ui->graph, &Graph::canRedoChanged, ui->btnRedo, &QPushButton::setEnabled);
     connect(ui->btnUndo, &QPushButton::clicked, ui->graph, &Graph::undo);
     connect(ui->btnRedo, &QPushButton::clicked, ui->graph, &Graph::redo);
+    connect(ui->btnFunction, &QPushButton::clicked, this, &MainWindow::onGenerateFunction);
 
     new QShortcut(QKeySequence::Undo, this, ui->btnUndo, &QPushButton::click);
     new QShortcut(QKeySequence::Redo, this, ui->btnRedo, &QPushButton::click);
@@ -161,4 +164,11 @@ void MainWindow::onScaleAndTranslate()
         const QPointF translation(d.ui->xTranslation->value(), d.ui->yTranslation->value());
         ui->graph->scaleAndTranslate(scale, translation);
     }
+}
+
+void MainWindow::onGenerateFunction()
+{
+    FunctionGenerator d(this);
+    if (d.exec() == QDialog::Accepted)
+        ui->graph->setPoints(d.ui->graphPreview->points());
 }
