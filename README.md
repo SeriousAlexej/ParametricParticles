@@ -205,6 +205,8 @@ This is an additional entity, representing a cylinder-shaped spawn volume. Parti
 
 * **Diameter** - diameter of this cylinder.
 * **Height** - height of this cylinder.
+* **Inner Diameter** - diameter of inner part of this cylinder, where particles are not allowed to spawn.
+* **Inner Height** - height of inner part of this cylinder, where particles are not allowed to spawn.
 
 ---
 
