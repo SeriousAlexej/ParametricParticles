@@ -80,6 +80,7 @@ Following events can be sent to this entity:
 #### Properties
 
 * **Active** - if *TRUE*, new particles are spawned each **Spawn interval (seconds)**.
+* **Alive particles max count** - defines how many particles can be alive at any given moment.
 * **Background** - if *TRUE*, particles will be rendered as a part of a background. This is useful when making clouds or flying birds etc.
 * **Blend type** - defines the blending mode of particle's texture on screen.
 * **Clipping box size X (for rendering only)** - this property defines the stretch of this entity, change it only if you experience problems with clipping (i.e. particles disappear sooner than they should when camera is turned away from them).
