@@ -213,3 +213,4 @@ This is an additional entity, representing a sphere-shaped spawn volume. Particl
 #### Properties
 
 * **Diameter** - diameter of this sphere.
+* **Diameter inner** - diameter of inner part of this sphere, where particles are not allowed to spawn.
