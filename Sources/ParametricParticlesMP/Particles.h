@@ -13,7 +13,10 @@ void RecacheGraphDiscrete(CStaticArray<FLOAT>& cache, const CTString& graph);
 INDEX LowerBound(const CStaticArray<FLOAT2D>& arr, const FLOAT value);
 void EditGraphVariable(const CEntity* self, BOOL& property, CTString& graph, ULONG flags = 0UL);
 
+#if _MSC_VER == 1200
+#define USE_CUSTOM_PARTICLE_PROJECTION
 CProjection3D* Particle_GetProjection();
+#endif
 
 extern BOOL g_parentIsPredictor;
 extern BOOL g_parentRelativePlacement;
@@ -27,6 +30,7 @@ struct Particle
   Particle();
   FLOAT RandomFloat(ULONG& rndSeed) const;
   BOOL IsAlive() const;
+  BOOL IsVisible(const ParametricParticles* parent) const;
   void Update(ParametricParticles* parent);
   void Create(ParametricParticles* parent);
   void Render(ParametricParticles* parent) const;

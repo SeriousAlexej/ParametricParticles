@@ -83,6 +83,8 @@ properties:
  40 BOOL m_help "Online Help..." = FALSE,
  41 ANIMATION m_textureAnimation "Texture animation" = 0,
  42 INDEX m_maxParticles "Alive particles max count" = 512,
+ 43 RANGE m_particleFallOff "Particle visibility fall-off" = 100.0f,
+ 44 RANGE m_particleHotSpot "Particle visibility hot-spot" = 90.0f,
 
 {
   Particle* lastFree;
@@ -191,28 +193,28 @@ functions:
 
     lastUsed = NULL;
     if (numActive > 0) {
-      for (INDEX i = 0; i < numActive; ++i) {
+      {for (INDEX i = 0; i < numActive; ++i) {
         particles[i].Read(strm);
-      }
+      }}
       particles[0].prev = NULL;
-      for (i = 1; i < numActive; ++i) {
+      {for (INDEX i = 1; i < numActive; ++i) {
         Particle& lhs = particles[i - 1];
         Particle& rhs = particles[i];
         lhs.next = &rhs;
         rhs.prev = &lhs;
-      }
+      }}
       particles[numActive - 1].next = NULL;
       lastUsed = &particles[numActive - 1];
     }
 
     lastFree = NULL;
-    for (INDEX i = numActive; i < m_maxParticles; ++i) {
+    {for (INDEX i = numActive; i < m_maxParticles; ++i) {
       particles[i].prev = NULL;
       particles[i].next = NULL;
-    }
-    for (i = numActive; i < m_maxParticles; ++i) {
+    }}
+    {for (INDEX i = numActive; i < m_maxParticles; ++i) {
       PushFree(&particles[i]);
-    }
+    }}
   }
   
   void Write_t(CTStream* strm)
@@ -324,20 +326,27 @@ functions:
       return;
     }
 
-    INDEX numParticles = 0;
-    Particle* particle = lastUsed;
-    while (particle)
-    {
-      renderParticles[numParticles++] = particle;
-      particle = particle->prev;
-    }
     g_parentIsPredictor = IsPredictor();
     g_parentRelativePlacement = m_particlePlacement == PP_RELATIVE ? TRUE : FALSE;
     g_projectionZAxis = Particle_GetProjection()->pr_ViewerRotationMatrix.GetRow(3);
     const CPlacement3D lerpedPlacement = GetLerpedPlacement();
     g_parentLerpedPositionForComparison = lerpedPlacement.pl_PositionVector;
     MakeRotationMatrixFast(g_parentLerpedRotationForComparison, lerpedPlacement.pl_OrientationAngle);
-    g_viewerLerpedPositionForComparison = Particle_GetViewer()->GetLerpedPlacement().pl_PositionVector;
+    g_viewerLerpedPositionForComparison = viewer->GetLerpedPlacement().pl_PositionVector;
+
+    INDEX numParticles = 0;
+    Particle* particle = lastUsed;
+    while (particle)
+    {
+      if (m_background || particle->IsVisible(this)) {
+        renderParticles[numParticles++] = particle;
+      }
+      particle = particle->prev;
+    }
+    if (numParticles == 0) {
+      return;
+    }
+
     qsort(renderParticles.sa_Array, numParticles, sizeof(Particle*), &Particle::CompareDistance);
 
     CTextureObject& to = GetModelObject()->mo_toTexture;
@@ -405,6 +414,8 @@ functions:
     m_rotationMin = Clamp(m_rotationMin, -180.0f, 180.0f);
     m_rotationMax = Clamp(m_rotationMax, m_rotationMin, 180.0f);
     m_maxParticles = ClampDn(m_maxParticles, INDEX(1));
+    m_particleFallOff = ClampDn(m_particleFallOff, 1.0f);
+    m_particleHotSpot = Clamp(m_particleHotSpot, 0.0f, m_particleFallOff);
   }
 
   void KillParticles()

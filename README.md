@@ -116,6 +116,8 @@ Greyed out areas of a graph mean that values within them will have no impact on 
 * **Particle stretch X...** - edits a graph of particle's Width stretch multiplier during its lifetime.
 * **Particle stretch Y...** - edits a graph of particle's Height stretch multiplier during its lifetime.
 * **Particle velocity force (chained)** - optional pointer to a chain of **ParticleVelocity** entities, that can change particle's velocity during its lifetime.
+* **Particle visibility fall-off** - distance at which particles are no longer visible.
+* **Particle visibility hot-spot** - distance at which particles start to disappear.
 * **Spawn count max** - maximum possible count of particles that are spawned each **Spawn interval (seconds)**
 * **Spawn count min** - minimum possible count of particles that are spawned each **Spawn interval (seconds)**
 * **Spawn interval (seconds)** - determines how often new particles are spawned. For example, a value of 2 means that new particles are spawned every 2 seconds.

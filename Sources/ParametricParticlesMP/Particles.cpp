@@ -183,12 +183,14 @@ void EditGraphVariable(const CEntity* self, BOOL& property, CTString& graph, ULO
   CloseHandle(pi.hThread);
 }
 
+#ifdef USE_CUSTOM_PARTICLE_PROJECTION
 CProjection3D* Particle_GetProjection()
 {
   static const int enginedllBaseAddress = reinterpret_cast<int>(&CEntity::HandleSentEvents) - 0xFEC80;
   static CProjection3D** ppProjection = reinterpret_cast<CProjection3D**>(enginedllBaseAddress + 0x1F64C8);
   return *ppProjection;
 }
+#endif
 
 Particle::Particle()
 : next(NULL)
@@ -211,6 +213,16 @@ FLOAT Particle::RandomFloat(ULONG& rndSeed) const
 BOOL Particle::IsAlive() const
 {
   return (_pTimer->CurrentTick() < deathTime) ? TRUE : FALSE;
+}
+
+BOOL Particle::IsVisible(const ParametricParticles* parent) const
+{
+  FLOAT3D pos = LerpedPos();
+  if (parent->m_particlePlacement == PP_RELATIVE)
+    pos = pos * g_parentLerpedRotationForComparison + g_parentLerpedPositionForComparison;
+
+  const FLOAT distanceToViewer = (pos - g_viewerLerpedPositionForComparison).Length();
+  return distanceToViewer < parent->m_particleFallOff ? TRUE : FALSE;
 }
 
 void Particle::Update(ParametricParticles* parent)
@@ -301,6 +313,15 @@ void Particle::Create(ParametricParticles* parent)
 
 void Particle::Render(ParametricParticles* parent) const
 {
+  FLOAT3D pos = LerpedPos();
+  if (parent->m_particlePlacement == PP_RELATIVE)
+    pos = pos * g_parentLerpedRotationForComparison + g_parentLerpedPositionForComparison;
+
+  FLOAT baseAlpha = 1.0f;
+  const FLOAT distanceToViewer = (pos - g_viewerLerpedPositionForComparison).Length();
+  if (distanceToViewer > parent->m_particleHotSpot)
+    baseAlpha = (parent->m_particleFallOff - distanceToViewer) / (parent->m_particleFallOff - parent->m_particleHotSpot);
+
   const FLOAT lerpedTick = _pTimer->GetLerpedCurrentTick();
   const FLOAT relativeLifetime = (lerpedTick - birthTime) / (deathTime - birthTime);
   const CTextureObject& to = parent->GetModelObject()->mo_toTexture;
@@ -321,10 +342,6 @@ void Particle::Render(ParametricParticles* parent) const
     to.GetHeight() / parent->m_iTextureNumRows,
     curCol,
     curRow);
-
-  FLOAT3D pos = LerpedPos();
-  if (parent->m_particlePlacement == PP_RELATIVE)
-    pos = pos * g_parentLerpedRotationForComparison + g_parentLerpedPositionForComparison;
 
   const CProjection3D* proj = Particle_GetProjection();
   FLOAT3D xAxis;
@@ -371,7 +388,7 @@ void Particle::Render(ParametricParticles* parent) const
   v2 = pos + xAxis*width*0.5f - yAxis*height*0.5f;
   v3 = pos + xAxis*width*0.5f + yAxis*height*0.5f;
 
-  Particle_RenderQuad3D(v0, v1, v2, v3, (parent->m_color & C_WHITE)|NormFloatToByte(parent->GetAlpha(relativeLifetime)));
+  Particle_RenderQuad3D(v0, v1, v2, v3, (parent->m_color & C_WHITE)|NormFloatToByte(baseAlpha * parent->GetAlpha(relativeLifetime)));
 }
 
 void Particle::Write(CTStream* strm)
