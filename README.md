@@ -190,9 +190,9 @@ This is an additional entity, representing a box-shaped spawn volume. Particles 
 * **Size X** - X size of this box.
 * **Size Y** - Y size of this box.
 * **Size Z** - Z size of this box.
-* **Size inner X** - X size of inner part of this box, where particles are not allowed to spawn.
-* **Size inner Y** - Y size of inner part of this box, where particles are not allowed to spawn.
-* **Size inner Z** - Z size of inner part of this box, where particles are not allowed to spawn.
+* **Inner Size X** - X size of inner part of this box, where particles are not allowed to spawn.
+* **Inner Size Y** - Y size of inner part of this box, where particles are not allowed to spawn.
+* **Inner Size Z** - Z size of inner part of this box, where particles are not allowed to spawn.
 
 ---
 
@@ -216,4 +216,4 @@ This is an additional entity, representing a sphere-shaped spawn volume. Particl
 #### Properties
 
 * **Diameter** - diameter of this sphere.
-* **Diameter inner** - diameter of inner part of this sphere, where particles are not allowed to spawn.
+* **Inner Diameter** - diameter of inner part of this sphere, where particles are not allowed to spawn.
