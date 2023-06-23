@@ -86,6 +86,8 @@ properties:
  43 RANGE m_particleFallOff "Particle visibility fall-off" = 30.0f,
  44 RANGE m_particleHotSpot "Particle visibility hot-spot" = 25.0f,
  45 FLOAT m_updateStep = 1.0f,
+ 46 FLOAT m_presimulationSpan "Presimulate time span" = 3.0f,
+ 47 BOOL m_presimulated = FALSE,
 
 {
   Particle* lastFree;
@@ -116,6 +118,8 @@ functions:
     renderParticles.Clear();
     renderParticles.New(m_maxParticles);
     
+    lastFree = NULL;
+    lastUsed = NULL;
     for (INDEX i = 0; i < m_maxParticles; ++i) {
       PushFree(&particles[i]);
     }
@@ -352,8 +356,7 @@ functions:
       return;
     }
     const CProjection3D* proj = Particle_GetProjection();
-    const CEntity* viewer = Particle_GetViewer();
-    if (!viewer || !proj) {
+    if (!proj) {
       return;
     }
 
@@ -363,8 +366,7 @@ functions:
     const CPlacement3D lerpedPlacement = GetLerpedPlacement();
     g_parentLerpedPositionForComparison = lerpedPlacement.pl_PositionVector;
     MakeRotationMatrixFast(g_parentLerpedRotationForComparison, lerpedPlacement.pl_OrientationAngle);
-    g_viewerLerpedPositionForComparison = viewer->GetLerpedPlacement().pl_PositionVector;
-
+    g_viewerLerpedPositionForComparison = proj->pr_ViewerPlacement.pl_PositionVector;
     INDEX numParticles = 0;
     Particle* particle = lastUsed;
     while (particle)
@@ -452,6 +454,7 @@ functions:
     m_particleFallOff = ClampDn(m_particleFallOff, 1.0f);
     m_particleHotSpot = Clamp(m_particleHotSpot, 0.0f, m_particleFallOff);
     m_updateStep = CTimer::TickQuantum;
+    m_presimulationSpan = Clamp(m_presimulationSpan, 0.0f, 10.0f);
   }
 
   void KillParticles()
@@ -462,12 +465,39 @@ functions:
     }
   }
 
+  void Presimulate()
+  {
+    const ULONG prevRandom = _pNetwork->ga_sesSessionState.ses_ulRandomSeed;
+
+    m_fLastSpawnTime = _pTimer->CurrentTick() - m_fSpawnInterval * 2.0f;
+    const INDEX ticksToSimulate = floor(m_presimulationSpan / CTimer::TickQuantum);
+    for (INDEX i = 0; i < ticksToSimulate; ++i)
+    {
+      UpdateParticles();
+      m_fLastSpawnTime -= CTimer::TickQuantum;
+      Particle* particle = lastUsed;
+      while (particle)
+      {
+        particle->birthTime -= CTimer::TickQuantum;
+        particle->deathTime -= CTimer::TickQuantum;
+        particle = particle->prev;
+      }
+      m_updateStep = CTimer::TickQuantum;
+    }
+    
+    _pNetwork->ga_sesSessionState.ses_ulRandomSeed = prevRandom;
+  }
+
 procedures:
   Active()
   {
+    if (m_presimulated) {
+      m_presimulated = FALSE;
+    } else {
+      m_fLastSpawnTime = _pTimer->CurrentTick() - m_fSpawnInterval * 2.0f;
+    }
     m_updateStep = CTimer::TickQuantum;
     m_bActive = TRUE;
-    m_fLastSpawnTime = _pTimer->CurrentTick() - m_fSpawnInterval * 2.0f;
 
     while (TRUE)
     {
@@ -569,8 +599,14 @@ procedures:
       m_help = FALSE;
       ShellExecute(NULL, NULL, "https://github.com/SeriousAlexej/ParametricParticles", NULL, NULL, SW_SHOW);
     }
+
+    if (m_bActive) {
+      Presimulate();
+    }
     
     autowait(0.1f);
+
+    m_presimulated = HasAliveParticles();
 
     if (m_bActive) {
       jump Active();

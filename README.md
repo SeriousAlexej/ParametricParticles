@@ -118,6 +118,7 @@ Greyed out areas of a graph mean that values within them will have no impact on 
 * **Particle velocity force (chained)** - optional pointer to a chain of **ParticleVelocity** entities, that can change particle's velocity during its lifetime.
 * **Particle visibility fall-off** - distance at which particles are no longer visible.
 * **Particle visibility hot-spot** - distance at which particles start to disappear.
+* **Presimulate time span** - number of seconds to presimulate particles.
 * **Spawn count max** - maximum possible count of particles that are spawned each **Spawn interval (seconds)**
 * **Spawn count min** - minimum possible count of particles that are spawned each **Spawn interval (seconds)**
 * **Spawn interval (seconds)** - determines how often new particles are spawned. For example, a value of 2 means that new particles are spawned every 2 seconds.
