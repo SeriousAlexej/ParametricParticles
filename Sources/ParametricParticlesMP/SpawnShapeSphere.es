@@ -11,7 +11,7 @@ features "HasName", "IsTargetable";
 properties:
   1 CTString m_strName "Name" 'N' = "Spawn shape Sphere",
   2 FLOAT m_diameter "Diameter" 'D' = 1.0f,
-  3 FLOAT m_diameterInner "Diameter inner" = 0.0f,
+  3 FLOAT m_diameterInner "Inner Diameter" = 0.0f,
 
 components:
   1 model MODEL_SPHERE "Models\\Editor\\SpawnShapeSphere.mdl",

@@ -39,8 +39,8 @@ functions:
         if (len > 0.001f) {
           const FLOAT f = len / (m_diameter * 0.5f);
           pos *= ((m_diameterInner*0.5f) + (m_diameter - m_diameterInner)*0.5f*f) / len;
-          pos(2) = (FRnd() - 0.5f) * m_heightInner;
         }
+        pos(2) = (FRnd() - 0.5f) * m_heightInner;
       } else {
         r *= m_diameter * 0.5f;
         pos = FLOAT3D(r * cos(theta), m_heightInner*0.5f + FRnd()*(m_height-m_heightInner)*0.5f, r * sin(theta));

@@ -364,6 +364,10 @@ functions:
 
   void MirrorAndStretch(FLOAT fStretch, BOOL bMirrorX)
   {
+    m_sizeX *= fStretch;
+    m_sizeY *= fStretch;
+    m_maxsizeX *= fStretch;
+    m_maxsizeY *= fStretch;
     m_fStretchX *= fStretch;
     m_fStretchY *= fStretch;
     m_fStretchZ *= fStretch;
