@@ -83,8 +83,9 @@ properties:
  40 BOOL m_help "Online Help..." = FALSE,
  41 ANIMATION m_textureAnimation "Texture animation" = 0,
  42 INDEX m_maxParticles "Alive particles max count" = 512,
- 43 RANGE m_particleFallOff "Particle visibility fall-off" = 100.0f,
- 44 RANGE m_particleHotSpot "Particle visibility hot-spot" = 90.0f,
+ 43 RANGE m_particleFallOff "Particle visibility fall-off" = 30.0f,
+ 44 RANGE m_particleHotSpot "Particle visibility hot-spot" = 25.0f,
+ 45 FLOAT m_updateStep = 1.0f,
 
 {
   Particle* lastFree;
@@ -286,6 +287,7 @@ functions:
 
   void UpdateParticles()
   {
+    FLOATaabbox3D box;
     Particle* particle = lastUsed;
     while (particle)
     {
@@ -294,25 +296,54 @@ functions:
 
       if (current->IsAlive()) {
         current->Update(this);
+        if (m_particlePlacement == PP_RELATIVE) {
+          box |= current->position * GetRotationMatrix() + GetPlacement().pl_PositionVector;
+        } else {
+          box |= current->position;
+        }
       } else {
         PushFree(current);
       }
     }
 
-    if (!m_bActive || m_fLastSpawnTime + m_fSpawnInterval > _pTimer->CurrentTick()) {
+    if (m_bActive && _pTimer->CurrentTick() >= m_fLastSpawnTime + m_fSpawnInterval)
+    {
+      m_fLastSpawnTime = _pTimer->CurrentTick();
+      const INDEX numToSpawn = m_iSpawnMin + (IRnd() % (m_iSpawnMax - m_iSpawnMin + 1));
+      for (INDEX i = 0; i < numToSpawn; ++i)
+      {
+        Particle* newParticle = PopFree();
+        if (!newParticle) {
+          break;
+        }
+        newParticle->Create(this);
+        if (m_particlePlacement == PP_RELATIVE) {
+          box |= newParticle->position * GetRotationMatrix() + GetPlacement().pl_PositionVector;
+        } else {
+          box |= newParticle->position;
+        }
+      }
+    }
+
+    box.Expand(m_particleFallOff + 20.0f);
+
+    if (m_background) {
       return;
     }
 
-    m_fLastSpawnTime = _pTimer->CurrentTick();
-    const INDEX numToSpawn = m_iSpawnMin + (IRnd() % (m_iSpawnMax - m_iSpawnMin + 1));
-    for (INDEX i = 0; i < numToSpawn; ++i)
+    for (INDEX i = 0; i < GetMaxPlayers(); ++i)
     {
-      Particle* newParticle = PopFree();
-      if (!newParticle) {
+      const CEntity* penPlayer = GetPlayerEntity(i);
+      if (!penPlayer) {
+        continue;
+      }
+      const FLOAT3D& plPos = penPlayer->GetPlacement().pl_PositionVector;
+      if (box.HasContactWith(plPos)) {
+        m_updateStep = CTimer::TickQuantum;
         return;
       }
-      newParticle->Create(this);
     }
+    m_updateStep = 2.0f + FRnd();
   }
 
   void RenderParticles()
@@ -420,6 +451,7 @@ functions:
     m_maxParticles = ClampDn(m_maxParticles, INDEX(1));
     m_particleFallOff = ClampDn(m_particleFallOff, 1.0f);
     m_particleHotSpot = Clamp(m_particleHotSpot, 0.0f, m_particleFallOff);
+    m_updateStep = CTimer::TickQuantum;
   }
 
   void KillParticles()
@@ -433,19 +465,19 @@ functions:
 procedures:
   Active()
   {
+    m_updateStep = CTimer::TickQuantum;
     m_bActive = TRUE;
     m_fLastSpawnTime = _pTimer->CurrentTick() - m_fSpawnInterval * 2.0f;
 
     while (TRUE)
     {
-      wait (CTimer::TickQuantum)
+      wait (m_updateStep)
       {
-        on (EBegin) :
+        on (ETimer) :    
         {
           UpdateParticles();
-          resume;
+          stop;
         }
-        on (ETimer) : { stop; }
         on (EDeactivate) :
         {
           jump InactiveDecaying(); 
@@ -464,14 +496,13 @@ procedures:
     m_bActive = FALSE;
     while (HasAliveParticles())
     {
-      wait (CTimer::TickQuantum)
+      wait (m_updateStep)
       {
-        on (EBegin) :
+        on (ETimer) :
         {
           UpdateParticles();
-          resume;
+          stop;
         }
-        on (ETimer) : { stop; }
         on (EActivate) :
         {
           jump Active();

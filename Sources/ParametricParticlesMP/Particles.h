@@ -31,7 +31,7 @@ struct Particle
   FLOAT RandomFloat(ULONG& rndSeed) const;
   BOOL IsAlive() const;
   BOOL IsVisible(const ParametricParticles* parent) const;
-  void Update(ParametricParticles* parent);
+  void Update(const ParametricParticles* parent);
   void Create(ParametricParticles* parent);
   void Render(ParametricParticles* parent) const;
   void Write(CTStream* strm);

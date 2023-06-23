@@ -225,7 +225,7 @@ BOOL Particle::IsVisible(const ParametricParticles* parent) const
   return distanceToViewer < parent->m_particleFallOff ? TRUE : FALSE;
 }
 
-void Particle::Update(ParametricParticles* parent)
+void Particle::Update(const ParametricParticles* parent)
 {
   lastPosition = position;
   lastRotation = rotation;
@@ -241,7 +241,7 @@ void Particle::Update(ParametricParticles* parent)
       MakeRotationMatrixFast(velocityOrientation, velocity->GetRandomAngles(RandomFloat(rndSeed), RandomFloat(rndSeed)));
       const FLOAT3D velDirection = FLOAT3D(0, 0, -1) * velocityOrientation * velocity->GetRotationMatrix();
 
-      position += velDirection * velocity->GetVelocityStretchSince(birthTime) * CTimer::TickQuantum;
+      position += velDirection * velocity->GetVelocityStretchSince(birthTime) * parent->m_updateStep;
     }
     velocity = (ParticleVelocity*)velocity->m_penNext.ep_pen;
   }
@@ -252,7 +252,7 @@ void Particle::Update(ParametricParticles* parent)
     if (RandomFloat(rndSeed) <= rotationp->m_probability)
     {
       const FLOAT rotSpeed = rotationp->m_rotationSpeedMin + RandomFloat(rndSeed) * (rotationp->m_rotationSpeedMax - rotationp->m_rotationSpeedMin);
-      rotation += rotSpeed * rotationp->GetSpeedStretchSince(birthTime) * CTimer::TickQuantum;
+      rotation += rotSpeed * rotationp->GetSpeedStretchSince(birthTime) * parent->m_updateStep;
     }
     rotationp = (ParticleRotation*)rotationp->m_penNext.ep_pen;
   }
