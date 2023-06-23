@@ -13,9 +13,9 @@ properties:
   2 FLOAT m_sizeX "Size X" 'X' = 1.0f,
   3 FLOAT m_sizeY "Size Y" 'Y' = 1.0f,
   4 FLOAT m_sizeZ "Size Z" 'Z' = 1.0f,
-  5 FLOAT m_sizeXinner "Size inner X" = 0.0f,
-  6 FLOAT m_sizeYinner "Size inner Y" = 0.0f,
-  7 FLOAT m_sizeZinner "Size inner Z" = 0.0f,
+  5 FLOAT m_sizeXinner "Inner Size X" = 0.0f,
+  6 FLOAT m_sizeYinner "Inner Size Y" = 0.0f,
+  7 FLOAT m_sizeZinner "Inner Size Z" = 0.0f,
 
 components:
   1 model MODEL_BOX "Models\\Editor\\ParametricParticles.mdl",
@@ -27,34 +27,139 @@ functions:
   {
     FLOAT3D pos;
     if (m_sizeXinner > 0.0f && m_sizeYinner > 0.0f && m_sizeZinner > 0.0f) {
-      const FLOAT a = FRnd();
-      const BOOL s = FRnd() > 0.5f ? TRUE : FALSE;
-      if (a <= 0.333333f) {
-        pos(1) = m_sizeXinner + (m_sizeX - m_sizeXinner)*FRnd();
-        if (s) {
-          pos(1) *= -0.5f;
+      const FLOAT dx = m_sizeX - m_sizeXinner;
+      const FLOAT dy = m_sizeY - m_sizeYinner;
+      const FLOAT dz = m_sizeZ - m_sizeZinner;
+      const FLOAT xPlatesVolume2 = dx*m_sizeYinner*m_sizeZinner;
+      const FLOAT yPlatesVolume2 = dy*m_sizeXinner*m_sizeZinner;
+      const FLOAT zPlatesVolume2 = dz*m_sizeXinner*m_sizeYinner;
+      const FLOAT xySausagesVolume4 = dx*dy*m_sizeZinner;
+      const FLOAT yzSausagesVolume4 = dy*dz*m_sizeXinner;
+      const FLOAT xzSausagesVolume4 = dx*dz*m_sizeYinner;
+      const FLOAT cornersVolume8 = dx*dy*dz;
+      const FLOAT effectiveVolume = m_sizeX*m_sizeY*m_sizeZ - m_sizeXinner*m_sizeYinner*m_sizeZinner;
+
+      const FLOAT plates = xPlatesVolume2 + yPlatesVolume2 + zPlatesVolume2;
+      const FLOAT sausages = xySausagesVolume4 + yzSausagesVolume4 + xzSausagesVolume4;
+      FLOAT r = FRnd();
+
+      if (r < plates / effectiveVolume && plates > 0.001f)
+      {
+        // plates
+        const INDEX s = IRnd()%2;
+        r *= effectiveVolume / plates;
+        if (r < xPlatesVolume2 / plates) {
+          pos = FLOAT3D(m_sizeXinner*0.5f + FRnd()*0.5f*dx, (FRnd() - 0.5f)*m_sizeYinner, (FRnd() - 0.5f)*m_sizeZinner);
+          if (s == 0) {
+            pos(1) *= -1;
+          }
+        } else if (r < (xPlatesVolume2 + yPlatesVolume2) / plates) {
+          pos = FLOAT3D((FRnd() - 0.5f)*m_sizeXinner, m_sizeYinner*0.5f + FRnd()*0.5f*dy, (FRnd() - 0.5f)*m_sizeZinner);
+          if (s == 0) {
+            pos(2) *= -1;
+          }
         } else {
-          pos(1) *= 0.5f;
+          pos = FLOAT3D((FRnd() - 0.5f)*m_sizeXinner, (FRnd() - 0.5f)*m_sizeYinner, m_sizeZinner*0.5f + FRnd()*0.5f*dz);
+          if (s == 0) {
+            pos(3) *= -1;
+          }
         }
-        pos(2) = (FRnd() - 0.5f) * m_sizeY;
-        pos(3) = (FRnd() - 0.5f) * m_sizeZ;
-      } else if (a <= 0.666666f) {
-        pos(1) = (FRnd() - 0.5f) * m_sizeX;
-        pos(2) = m_sizeYinner + (m_sizeY - m_sizeYinner)*FRnd();
-        if (s) {
-          pos(2) *= -0.5f;
+      } else if (r < (plates + sausages) / effectiveVolume && sausages > 0.001f)
+      {
+        // sausages
+        const INDEX s = IRnd()%4;
+        r *= effectiveVolume / (plates + sausages);
+        if (r < xySausagesVolume4 / sausages && xySausagesVolume4 > 0.001f) {
+          pos = FLOAT3D(m_sizeXinner*0.5f + FRnd()*0.5f*dx, m_sizeYinner*0.5f + FRnd()*0.5f*dy, (FRnd() - 0.5f)*m_sizeZinner);
+          switch (s)
+          {
+          case 1:
+            // X+Y- sausage
+            pos(2) *= -1;
+            break;
+          case 2:
+            // X-Y- sausage
+            pos(1) *= -1;
+            pos(2) *= -1;
+            break;
+          case 3:
+            // X-Y+ sausage
+            pos(1) *= -1;
+            break;
+          }
+        } else if (r < (xySausagesVolume4 + yzSausagesVolume4) / sausages && yzSausagesVolume4 > 0.001f) {
+          pos = FLOAT3D((FRnd() - 0.5f)*m_sizeXinner, m_sizeYinner*0.5f + FRnd()*0.5f*dy, m_sizeZinner*0.5f + FRnd()*0.5f*dz);
+          switch (s)
+          {
+          case 1:
+            // Y+Z- sausage
+            pos(3) *= -1;
+            break;
+          case 2:
+            // Y-Z- sausage
+            pos(2) *= -1;
+            pos(3) *= -1;
+            break;
+          case 3:
+            // Y-Z+ sausage
+            pos(2) *= -1;
+            break;
+          }
         } else {
-          pos(2) *= 0.5f;
+          pos = FLOAT3D(m_sizeXinner*0.5f + FRnd()*0.5f*dx, (FRnd() - 0.5f)*m_sizeYinner, m_sizeZinner*0.5f + FRnd()*0.5f*dz);
+          switch(s)
+          {
+          case 1:
+            // X+Z- sausage
+            pos(3) *= -1;
+            break;
+          case 2:
+            // X-Z- sausage
+            pos(1) *= -1;
+            pos(3) *= -1;
+            break;
+          case 3:
+            // X-Z+ sausage
+            pos(1) *= -1;
+            break;
+          }
         }
-        pos(3) = (FRnd() - 0.5f) * m_sizeZ;
       } else {
-        pos(1) = (FRnd() - 0.5f) * m_sizeX;
-        pos(2) = (FRnd() - 0.5f) * m_sizeY;
-        pos(3) = m_sizeZinner + (m_sizeZ - m_sizeZinner)*FRnd();
-        if (s) {
-          pos(3) *= -0.5f;
-        } else {
-          pos(3) *= 0.5f;
+        // corners
+        pos = FLOAT3D(m_sizeXinner*0.5f + FRnd()*0.5f*dx, m_sizeYinner*0.5f + FRnd()*0.5f*dy, m_sizeZinner*0.5f + FRnd()*0.5f*dz);
+        switch (IRnd()%8)
+        {
+        case 1:
+          // X+Y+Z- corner
+          pos(3) *= -1;
+          break;
+        case 2:
+          // X+Y-Z+ corner
+          pos(2) *= -1;
+          break;
+        case 3:
+          // X+Y-Z- corner
+          pos(2) *= -1;
+          pos(3) *= -1;
+          break;
+        case 4:
+          // X-Y+Z+ corner
+          pos(1) *= -1;
+          break;
+        case 5:
+          // X-Y+Z- corner
+          pos(1) *= -1;
+          pos(3) *= -1;
+          break;
+        case 6:
+          // X-Y-Z+ corner
+          pos(1) *= -1;
+          pos(2) *= -1;
+          break;
+        case 7:
+          // X-Y-Z- corner
+          pos *= -1;
+          break;
         }
       }
     } else {
