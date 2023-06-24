@@ -450,7 +450,7 @@ functions:
     m_particleFallOff = ClampDn(m_particleFallOff, 1.0f);
     m_particleHotSpot = Clamp(m_particleHotSpot, 0.0f, m_particleFallOff);
     m_updateStep = CTimer::TickQuantum;
-    m_presimulationSpan = Clamp(m_presimulationSpan, 0.0f, 10.0f);
+    m_presimulationSpan = Clamp(m_presimulationSpan, 0.0f, 60.0f);
   }
 
   void KillParticles()
