@@ -2,6 +2,7 @@
 %{
 #include "StdH.h"
 #include "Particles.h"
+#include "AutoHeightMap.h"
 #define ID_PARAMETRIC_PARTICLES "PPAR"
 %}
 
@@ -88,6 +89,7 @@ properties:
  45 FLOAT m_updateStep = 1.0f,
  46 FLOAT m_presimulationSpan "Presimulate time span" = 3.0f,
  47 BOOL m_presimulated = FALSE,
+ 48 CEntityPointer m_penHeightMap "Height maps (chained)",
 
 {
   Particle* lastFree;
@@ -129,9 +131,16 @@ functions:
     RecacheGraph(stretchYCache, m_stretchYGraph);
   }
 
-  FLOAT GetAlpha(FLOAT f) const
+  FLOAT GetAlpha(FLOAT f, const FLOAT3D& p) const
   {
-    return Clamp(GetGraphValueAt(alphaCache, f), 0.0f, 1.0f);
+    FLOAT alpha = Clamp(GetGraphValueAt(alphaCache, f), 0.0f, 1.0f);
+    const AutoHeightMap* heightMap = (const AutoHeightMap*)m_penHeightMap.ep_pen;
+    while (alpha > 0.0001f && heightMap)
+    {
+      alpha *= heightMap->GetAlpha(p);
+      heightMap = (const AutoHeightMap*)heightMap->m_penNext.ep_pen;
+    }
+    return alpha;
   }
 
   FLOAT GetXStretch(FLOAT f) const
@@ -152,12 +161,20 @@ functions:
   
   BOOL IsTargetValid(SLONG slPropertyOffset, CEntity* penTarget)
   {
+    if (slPropertyOffset == offsetof(ParametricParticles, m_penHeightMap))
+    {
+      if (!penTarget) {
+        return TRUE;
+      }
+      return (penTarget->GetClass()->ec_pdecDLLClass->dec_iID == 4248) ? TRUE : FALSE;
+    }
+
     if (slPropertyOffset == offsetof(ParametricParticles, m_penVelocity))
     {
       if (!penTarget) {
         return TRUE;
       }
-      return (penTarget->GetClass()->ec_pdecDLLClass->dec_iID == 4247) ? TRUE: FALSE;
+      return (penTarget->GetClass()->ec_pdecDLLClass->dec_iID == 4247) ? TRUE : FALSE;
     }
 
     if (slPropertyOffset == offsetof(ParametricParticles, m_penRotation))
@@ -367,6 +384,7 @@ functions:
     g_parentLerpedPositionForComparison = lerpedPlacement.pl_PositionVector;
     MakeRotationMatrixFast(g_parentLerpedRotationForComparison, lerpedPlacement.pl_OrientationAngle);
     g_viewerLerpedPositionForComparison = proj->pr_ViewerPlacement.pl_PositionVector;
+
     INDEX numParticles = 0;
     Particle* particle = lastUsed;
     while (particle)
@@ -422,6 +440,9 @@ functions:
 
   void AdjustProperties()
   {
+    if (!IsTargetValid(offsetof(ParametricParticles, m_penHeightMap), m_penHeightMap.ep_pen)) {
+      m_penHeightMap = NULL;
+    }
     if (!IsTargetValid(offsetof(ParametricParticles, m_penVelocity), m_penVelocity.ep_pen)) {
       m_penVelocity = NULL;
     }

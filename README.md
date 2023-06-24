@@ -23,6 +23,7 @@ Advanced particle entity for the *Serious Sam - The Second Encounter 1.07*
    4. [SpawnShapeBox](#box)
    5. [SpawnShapeCylinder](#cylinder)
    6. [SpawnShapeSphere](#sphere)
+   7. [AutoHeightMap](#heightmap)
 
 ---
 
@@ -44,7 +45,7 @@ Waterfalls, smoke, sparkles, clouds, fire, ambient particles, dusty air, firefli
 
 # New entities<a name="entities"></a>
 
-Particles are implemented with 6 new entities.
+Particles are implemented with 7 new entities.
 
 <img src="./Images/Entities.png">
 
@@ -87,6 +88,7 @@ Following events can be sent to this entity:
 * **Clipping box size Y** - same as above, but for *Y* axis.
 * **Clipping box size Z** - same as above, but for *Z* axis.
 * **Flat type** - determines how particles are oriented relative to the viewer.
+* **Height maps (chained)** - optional pointer to a chain of **AutoHeightMap** entities, that can change particle's alpha channel depending on current elevation.
 * **Online Help...** - opens up this github page.
 * **Particle alpha...** - edits a graph of relative alpha value during its lifetime.
 Graph editing is implemented with an external executable *Graph.exe* that is called from the *Serious Editor*.
@@ -220,3 +222,22 @@ This is an additional entity, representing a sphere-shaped spawn volume. Particl
 
 * **Diameter** - diameter of this sphere.
 * **Inner Diameter** - diameter of inner part of this sphere, where particles are not allowed to spawn.
+
+---
+
+### AutoHeightMap<a name="heightmap"></a>
+<img src="./Images/AutoHeightMapTbn.png">
+
+This entity automatically generates heightmap for given area (orientation can be arbitrary). Particles below heightmap area will have 0 alpha channel. Particles above and outside of heightmap area will have their alpha channel intact.
+
+Multiple heightmaps can be used for single particle entity by building up a chain of **AutoHeightMap** entities.
+
+#### Properties
+
+* **Next height map (chained)** - a pointer to another **AutoHeightMap** entity, that should also be used. Loops in chains are not allowed.
+* **Recalculate** - a shortcut for discarding old heightmap and calculating a new one.
+* **Size X** - X size of volume for this heightmap.
+* **Size Y** - Y size of volume for this heightmap.
+* **Size Z** - Z size of volume for this heightmap.
+* **Step in meters** - interval at which height values are sampled. Lower number means higher resolution.
+* **Visible** - if set to *TRUE*, calculated heightmap is visualized in *Serious Editor* in form of transparent yellow particles.

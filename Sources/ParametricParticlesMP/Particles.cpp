@@ -388,7 +388,7 @@ void Particle::Render(ParametricParticles* parent) const
   v2 = pos + xAxis*width*0.5f - yAxis*height*0.5f;
   v3 = pos + xAxis*width*0.5f + yAxis*height*0.5f;
 
-  Particle_RenderQuad3D(v0, v1, v2, v3, (parent->m_color & C_WHITE)|NormFloatToByte(baseAlpha * parent->GetAlpha(relativeLifetime)));
+  Particle_RenderQuad3D(v0, v1, v2, v3, (parent->m_color & C_WHITE)|NormFloatToByte(baseAlpha * parent->GetAlpha(relativeLifetime, pos)));
 }
 
 void Particle::Write(CTStream* strm)
