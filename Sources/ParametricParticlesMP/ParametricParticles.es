@@ -504,6 +504,11 @@ procedures:
           UpdateParticles();
           stop;
         }
+        on (EActivate) :
+        {
+          m_updateStep = CTimer::TickQuantum;
+          stop;
+        }
         on (EDeactivate) :
         {
           jump InactiveDecaying(); 
