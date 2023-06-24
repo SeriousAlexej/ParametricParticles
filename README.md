@@ -103,7 +103,9 @@ Greyed out areas of a graph mean that values within them will have no impact on 
 
 <img src="./Images/Graph.png">
 
-* **Particle color** - base color of particles. Note: alpha value here is discarded! Use **Particle alpha...** instead!
+* **Particle color base** - base color of particles. Note: alpha value here is discarded! Use **Particle alpha...** instead!
+* **Particle color animation file** - animation file with color keyframes.
+* **Particle color animation** - determines which animation from **Particle color animation file** will be used. Color will be multiplied with **Particle color base**, while alpha value will be taken from **Particle alpha...**.
 * **Particle lifetime max** - longest possible lifetime of a particle.
 * **Particle lifetime min** - shortest possible lifetime of a particle.
 * **Particle placement** - if this property is set to *Relative*, then particles act as if they were parented to this entity. Only meaningful when this entity is moving (i.e. parented to a *MovingBrush* etc).

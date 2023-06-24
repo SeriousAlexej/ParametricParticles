@@ -4,6 +4,15 @@
 #include "Particles.h"
 #include "AutoHeightMap.h"
 #define ID_PARAMETRIC_PARTICLES "PPAR"
+
+class COneAnim
+{
+public:
+  NAME oa_Name;
+  TIME oa_SecsPerFrame;
+  INDEX oa_NumberOfFrames;
+  INDEX* oa_FrameIndices;
+};
 %}
 
 enum eParticleBlendType
@@ -68,7 +77,7 @@ properties:
  24 CTString m_stretchYGraph = "0 1",
  25 FLOAT m_sizeX "Particle size X min" = 1.0f,
  26 FLOAT m_sizeY "Particle size Y min" = 1.0f,
- 27 COLOR m_color "Particle color" = C_WHITE,
+ 27 COLOR m_color "Particle color base" = C_WHITE,
  28 enum eTextureType m_textureType "Texture type" = TT_RANDOM_FRAME,
  29 FLOAT m_textureSpeed "Texture animation FPS" = 24.0f,
  30 INDEX m_textureTiles "Texture tiles count" = 1,
@@ -90,6 +99,9 @@ properties:
  46 FLOAT m_presimulationSpan "Presimulate time span" = 3.0f,
  47 BOOL m_presimulated = FALSE,
  48 CEntityPointer m_penHeightMap "Height maps (chained)",
+ 49 CAnimObject m_colorAnimationObject,
+ 50 ANIMATION m_colorAnimation "Particle color animation" = 0,
+ 51 CTFileName m_colorAnimationFile "Particle color animation file" = CTString(""),
 
 {
   Particle* lastFree;
@@ -109,6 +121,8 @@ functions:
   {
     if (slPropertyOffset == offsetof(ParametricParticles, m_textureAnimation)) {
       return GetModelObject()->mo_toTexture.GetData();
+    } else if (slPropertyOffset == offsetof(ParametricParticles, m_colorAnimation)) {
+      return m_colorAnimationObject.GetData();
     }
     return CMovableModelEntity::GetAnimData(slPropertyOffset);
   }
@@ -129,6 +143,33 @@ functions:
     RecacheGraph(alphaCache, m_alphaGraph);
     RecacheGraph(stretchXCache, m_stretchXGraph);
     RecacheGraph(stretchYCache, m_stretchYGraph);
+  }
+
+  COLOR GetColorSince(FLOAT birthTime) const
+  {
+    COLOR col = m_color;
+
+    const CAnimData* animData = m_colorAnimationObject.ao_AnimData;
+    if (animData && m_colorAnimation < animData->ad_NumberOfAnims)
+    {
+      const COneAnim& anim = animData->ad_Anims[m_colorAnimation];
+      if (anim.oa_NumberOfFrames > 0)
+      {
+        const TIME tmCurrentRelative = _pTimer->GetLerpedCurrentTick() - birthTime;
+        const FLOAT fFrameNow = tmCurrentRelative / anim.oa_SecsPerFrame;
+        const INDEX col0 = anim.oa_FrameIndices[ULONG(fFrameNow) % anim.oa_NumberOfFrames];
+        const INDEX col1 = anim.oa_FrameIndices[ULONG(fFrameNow+1) % anim.oa_NumberOfFrames];
+        const FLOAT f = fFrameNow - floor(fFrameNow);
+
+        UBYTE R0, G0, B0;
+        UBYTE R1, G1, B1;
+        ColorToRGB(col0, R0, G0, B0);
+        ColorToRGB(col1, R1, G1, B1);
+
+        col = MulColors(col, RGBToColor(Lerp(R0, R1, f), Lerp(G0, G1, f), Lerp(B0, B1, f)));
+      }
+    }
+    return col & C_WHITE;
   }
 
   FLOAT GetAlpha(FLOAT f, const FLOAT3D& p) const
@@ -595,6 +636,12 @@ procedures:
       GetModelObject()->mo_toTexture.SetData_t(m_fnTexture);
       GetModelObject()->mo_toTexture.PlayAnim(m_textureAnimation, AOF_LOOPING);
     } catch (const char* error) {
+      WarningMessage(error);
+    }
+    try {
+      m_colorAnimationObject.SetData_t(m_colorAnimationFile);
+    } catch (const char* error) {
+      m_colorAnimationFile = "";
       WarningMessage(error);
     }
     ModelChangeNotify();
