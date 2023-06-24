@@ -404,10 +404,6 @@ functions:
     m_fStretchX *= fStretch;
     m_fStretchY *= fStretch;
     m_fStretchZ *= fStretch;
-
-    if (bMirrorX) {
-      m_fStretchX = -m_fStretchX;
-    }
   }
   
   void StretchModel()
