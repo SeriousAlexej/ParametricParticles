@@ -210,7 +210,7 @@ void Graph::paintEvent(QPaintEvent*)
         verticalStops.emplace_back(std::make_pair(pt.x(), x));
     }
     for (double y = std::round(m_viewport.y() / gridYstep) * gridYstep;
-         y > m_viewport.y() - m_viewport.width();
+         y > m_viewport.y() - m_viewport.height();
          y -= gridYstep)
     {
         const auto pt = mapFromViewport({0, y});
