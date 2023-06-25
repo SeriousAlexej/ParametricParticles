@@ -37,8 +37,7 @@ functions:
         pos = FLOAT3D(r * cos(theta), 0.0f, r * sin(theta));
         const FLOAT len = pos.Length();
         if (len > 0.001f) {
-          const FLOAT f = len / (m_diameter * 0.5f);
-          pos *= ((m_diameterInner*0.5f) + (m_diameter - m_diameterInner)*0.5f*f) / len;
+          pos = (pos / len) * ((m_diameterInner*0.5f) + (m_diameter - m_diameterInner)*0.5f*len);
         }
         pos(2) = (FRnd() - 0.5f) * m_heightInner;
       } else {
