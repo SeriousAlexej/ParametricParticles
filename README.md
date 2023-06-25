@@ -2,12 +2,12 @@
 
 Advanced particle entity for the *Serious Sam - The Second Encounter 1.07*
 
+<img width="322" height="258" align="left" src="./Images/Particles_Talos.gif">
 <img width="322" height="258" align="left" src="./Images/Particles_Rain.gif">
 <img width="322" height="258" align="left" src="./Images/Particles_FireSmoke.gif">
 <img width="322" height="258" align="left" src="./Images/Particles_TreeBirds.gif">
 <img width="322" height="258" align="left" src="./Images/Particles_Beams.gif">
-<img width="322" height="258" align="left" src="./Images/Particles_MovingShower.gif">
-<img width="322" height="258" src="./Images/Particles_AnimatedSprites.gif">
+<img width="322" height="258" src="./Images/Particles_MovingShower.gif">
 
 ## Video Demonstration (YouTube, clickable)
 [![Parametric Particles Demo](https://img.youtube.com/vi/x7sMZ5C2bh4/maxresdefault.jpg)](https://youtu.be/x7sMZ5C2bh4)
