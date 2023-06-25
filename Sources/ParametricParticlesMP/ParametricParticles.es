@@ -557,6 +557,7 @@ procedures:
     }
     m_updateStep = CTimer::TickQuantum;
     m_bActive = TRUE;
+    UpdateParticles();
 
     while (TRUE)
     {
