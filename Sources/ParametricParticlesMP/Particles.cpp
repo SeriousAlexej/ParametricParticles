@@ -201,6 +201,7 @@ Particle::Particle()
 , tileCol(0)
 , birthTime(-1)
 , deathTime(-1)
+, additionalRotation(0)
 {
 }
 
@@ -271,6 +272,7 @@ void Particle::Create(ParametricParticles* parent)
 
   rotation = parent->m_rotationMin + parent->FRnd() * (parent->m_rotationMax - parent->m_rotationMin);
   lastRotation = rotation;
+  additionalRotation = 0.0f;
 
   if (parent->m_penSpawnerShape)
   {
@@ -368,7 +370,43 @@ void Particle::Render(ParametricParticles* parent) const
     xAxis = axes.GetRow(1);
     yAxis = axes.GetRow(2);
   }
-  const FLOAT rot = LerpedRot();
+  if (parent->m_followVelocity)
+  {
+    const FLOAT3D zAxis = xAxis * yAxis;
+    FLOATmatrix3D basis;
+    basis.matrix[0][0] = xAxis(1);
+    basis.matrix[0][1] = xAxis(2);
+    basis.matrix[0][2] = xAxis(3);
+    basis.matrix[1][0] = yAxis(1);
+    basis.matrix[1][1] = yAxis(2);
+    basis.matrix[1][2] = yAxis(3);
+    basis.matrix[2][0] = zAxis(1);
+    basis.matrix[2][1] = zAxis(2);
+    basis.matrix[2][2] = zAxis(3);
+    FLOAT3D dir = position - lastPosition;
+    if (parent->m_particlePlacement == PP_RELATIVE)
+      dir *= g_parentLerpedRotationForComparison;
+    dir *= basis;
+    const FLOAT2D dirProj(dir(1), dir(2));
+    const FLOAT len = dirProj.Length();
+    if (len > 0.00001f)
+    {
+      const FLOAT rotRad = additionalRotation * PI / 180.0f;
+      const FLOAT2D c(-sin(rotRad), cos(rotRad));
+      FLOAT2D desired = (dirProj/len + c) * 0.5f;
+      if (Abs(desired(1)) < 0.001f && Abs(desired(2)) < 0.001f)
+      {
+        additionalRotation += 90.0f;
+      } else {
+        desired.SafeNormalize();
+        FLOAT a = acos(Clamp(desired(2), -1.0f, 1.0f));
+        if (desired(1) > 0.0f)
+          a *= -1.0f;
+        additionalRotation = a * 180.0f / PI;
+      }
+    }
+  }
+  const FLOAT rot = LerpedRot() - additionalRotation;
   if (rot != 0.0f)
   {
     const FLOAT rotRad = rot * PI / 180.0f;
@@ -415,6 +453,7 @@ void Particle::Read(CTStream* strm)
 {
   next = NULL;
   prev = NULL;
+  additionalRotation = 0.0f;
   CTStream& s = *strm;
   INDEX versionMajor;
   INDEX versionMinor;

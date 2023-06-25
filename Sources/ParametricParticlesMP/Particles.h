@@ -55,6 +55,8 @@ struct Particle
   TIME birthTime;
   TIME deathTime;
   ULONG savedRndSeed;
+
+  mutable FLOAT additionalRotation;
 };
 
 template<typename TClass>

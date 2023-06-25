@@ -102,6 +102,7 @@ properties:
  49 CAnimObject m_colorAnimationObject,
  50 ANIMATION m_colorAnimation "Particle color animation" = 0,
  51 CTFileName m_colorAnimationFile "Particle color animation file" = CTString(""),
+ 52 BOOL m_followVelocity "Orient towards velocity" = FALSE,
 
 {
   Particle* lastFree;

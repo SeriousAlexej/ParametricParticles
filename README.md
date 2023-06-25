@@ -90,6 +90,7 @@ Following events can be sent to this entity:
 * **Flat type** - determines how particles are oriented relative to the viewer.
 * **Height maps (chained)** - optional pointer to a chain of **AutoHeightMap** entities, that can change particle's alpha channel depending on current elevation.
 * **Online Help...** - opens up this github page.
+* **Orient towards velocity** - if set to *TRUE*, particle's Y+ axis will be aligned with moving direction. Further rotation from other properties (like **Particle rotation min/max** etc) will be applied on top of it.
 * **Particle alpha...** - edits a graph of relative alpha value during its lifetime.
 Graph editing is implemented with an external executable *Graph.exe* that is called from the *Serious Editor*.
 
