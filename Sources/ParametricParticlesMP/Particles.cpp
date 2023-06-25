@@ -391,20 +391,46 @@ void Particle::Render(ParametricParticles* parent) const
   Particle_RenderQuad3D(v0, v1, v2, v3, parent->GetColorSince(birthTime)|NormFloatToByte(baseAlpha * parent->GetAlpha(relativeLifetime, pos)));
 }
 
-void Particle::Write(CTStream* strm)
+void Particle::Write(CTStream* strm) const
 {
-  Particle* nextBackup = next;
-  Particle* prevBackup = prev;
-  next = NULL;
-  prev = NULL;
-  strm->WriteRawChunk_t(this, sizeof(Particle));
-  next = nextBackup;
-  prev = prevBackup;
+  CTStream& s = *strm;
+  const INDEX versionMajor = 0;
+  const INDEX versionMinor = 0;
+  s << versionMajor;
+  s << versionMinor;
+  s << id;
+  s << position(1) << position(2) << position(3);
+  s << lastPosition(1) << lastPosition(2) << lastPosition(3);
+  s << size(1) << size(2);
+  s << rotation;
+  s << lastRotation;
+  s << tileRow;
+  s << tileCol;
+  s << birthTime;
+  s << deathTime;
+  s << savedRndSeed;
 }
 
 void Particle::Read(CTStream* strm)
 {
-  strm->ReadRawChunk_t(this, sizeof(Particle));
+  next = NULL;
+  prev = NULL;
+  CTStream& s = *strm;
+  INDEX versionMajor;
+  INDEX versionMinor;
+  s >> versionMajor;
+  s >> versionMinor;
+  s >> id;
+  s >> position(1) >> position(2) >> position(3);
+  s >> lastPosition(1) >> lastPosition(2) >> lastPosition(3);
+  s >> size(1) >> size(2);
+  s >> rotation;
+  s >> lastRotation;
+  s >> tileRow;
+  s >> tileCol;
+  s >> birthTime;
+  s >> deathTime;
+  s >> savedRndSeed;
 }
 
 FLOAT3D Particle::LerpedPos() const

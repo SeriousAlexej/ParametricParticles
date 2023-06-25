@@ -34,7 +34,7 @@ struct Particle
   void Update(const ParametricParticles* parent);
   void Create(ParametricParticles* parent);
   void Render(ParametricParticles* parent) const;
-  void Write(CTStream* strm);
+  void Write(CTStream* strm) const;
   void Read(CTStream* strm);
   FLOAT3D LerpedPos() const;
   FLOAT LerpedRot() const;
