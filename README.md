@@ -10,7 +10,12 @@ Advanced particle entity for the *Serious Sam - The Second Encounter 1.07*
 <img width="322" height="258" src="./Images/Particles_MovingShower.gif">
 
 ## Video Demonstration (YouTube, clickable)
-[![Parametric Particles Demo](https://img.youtube.com/vi/x7sMZ5C2bh4/maxresdefault.jpg)](https://youtu.be/x7sMZ5C2bh4)
+[![Parametric Particles Demo](https://img.youtube.com/vi/DcomwTeyTDI/maxresdefault.jpg)](https://youtu.be/DcomwTeyTDI)
+
+---
+
+## 1.1 Update Feature Showcase (YouTube, clickable)
+[![1.1 Update Feature Showcase](https://img.youtube.com/vi/vHMXuQAiwK0/maxresdefault.jpg)](https://youtu.be/vHMXuQAiwK0)
 
 ---
 
@@ -39,7 +44,7 @@ Waterfalls, smoke, sparkles, clouds, fire, ambient particles, dusty air, firefli
 
 1. Download an archive from the [latest release](https://github.com/SeriousAlexej/ParametricParticles/releases/latest) page.
 2. Extract this archive to the root directory of *Serious Sam - The Second Encounter 1.07*
-3. Launch **Serious Editor** and add all new classes to the virtual tree.
+3. Launch **Serious Editor** and add all new classes to the virtual tree. Note: gif might not show all available classes.
 <img src="./Images/Particles_Install.gif">
 
 
