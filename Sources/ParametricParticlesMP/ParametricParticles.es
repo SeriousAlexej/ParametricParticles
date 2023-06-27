@@ -635,7 +635,11 @@ procedures:
     StretchModel();
     SetModel(BOX_MODEL);
     try {
-      GetModelObject()->mo_toTexture.SetData_t(m_fnTexture);
+      if (m_fnTexture.Length() > 0) {
+        GetModelObject()->mo_toTexture.SetData_t(m_fnTexture);
+      } else {
+        GetModelObject()->mo_toTexture.SetData_t(CTString("Models\\Editor\\Teleport.tex"));
+      }
       GetModelObject()->mo_toTexture.PlayAnim(m_textureAnimation, AOF_LOOPING);
     } catch (const char* error) {
       WarningMessage(error);
