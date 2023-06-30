@@ -77,4 +77,18 @@ BOOL EnsureNoLoops(const TClass* pthis, const TClass* pthat)
   return TRUE;
 }
 
+template<typename TClass>
+void ReinitParent(TClass* self)
+{
+  if (_bWorldEditorApp)
+  {
+    CEntity* parent = self->p_parent.Get();
+    if (parent)
+    {
+      parent->End();
+      parent->Initialize();
+    }
+  }
+}
+
 #endif // PARAMETRIC_PARTICLES_42_H

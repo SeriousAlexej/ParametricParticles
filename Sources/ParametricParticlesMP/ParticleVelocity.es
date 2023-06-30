@@ -4,7 +4,7 @@
 #include "Particles.h"
 %}
 
-class ParticleVelocity : CEntity {
+class ParticleVelocity : CEntity_EnableWeakPointer {
 name "ParticleVelocity";
 thumbnail "Thumbnails\\ParticleVelocity.tbn";
 features "HasName", "IsTargetable";
@@ -23,6 +23,7 @@ properties:
 
 {
   CStaticArray<FLOAT> speedStretch;
+  WeakPointer p_parent;
 }
 
 components:
@@ -48,9 +49,16 @@ functions:
   }
 
   void Read_t(CTStream* strm)
-  { 
+  {
     CEntity::Read_t(strm);
+    p_parent.Read(this, strm);
     RecacheGraphs();
+  }
+
+  void Write_t(CTStream* strm)
+  {
+    CEntity::Write_t(strm);
+    p_parent.Write(strm);
   }
 
   BOOL IsTargetValid(SLONG slPropertyOffset, CEntity* penTarget)
@@ -66,6 +74,12 @@ functions:
       return FALSE;
     }
     return CEntity::IsTargetValid(slPropertyOffset, penTarget);
+  }
+
+  void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)
+  {
+    CEntity::SetPlacement_internal(plNew, mRotation, bNear);
+    ReinitParent(this);
   }
 
 procedures:
@@ -87,5 +101,10 @@ procedures:
     
     EditGraphVariable(this, m_speedStretchEdit, m_speedStretch);
     RecacheGraphs();
+    
+    ReinitParent(this);
+    if (_bWorldEditorApp && m_penNext) {
+      ((ParticleVelocity*)m_penNext.ep_pen)->p_parent = this;
+    }
   }
 };

@@ -3,6 +3,11 @@
 #include "StdH.h"
 #include "Particles.h"
 #include "AutoHeightMap.h"
+#include "ParticleVelocity.h"
+#include "ParticleRotation.h"
+#include "SpawnShapeBox.h"
+#include "SpawnShapeCylinder.h"
+#include "SpawnShapeSphere.h"
 #define ID_PARAMETRIC_PARTICLES "PPAR"
 
 class COneAnim
@@ -44,7 +49,7 @@ enum eParticlePlacement
   1 PP_RELATIVE "Relative",
 };
 
-class ParametricParticles : CMovableModelEntity
+class ParametricParticles : CMovableModelEntity_EnableWeakPointer
 {
 name "ParametricParticles";
 thumbnail "Thumbnails\\ParametricParticles.tbn";
@@ -247,7 +252,7 @@ functions:
 
   void Read_t(CTStream* strm)
   { 
-    CMovableModelEntity::Read_t(strm);
+    CMovableModelEntity_EnableWeakPointer::Read_t(strm);
     RecacheArrays();
     
     strm->ExpectID_t(ID_PARAMETRIC_PARTICLES);
@@ -283,7 +288,7 @@ functions:
   
   void Write_t(CTStream* strm)
   {
-    CMovableModelEntity::Write_t(strm);
+    CMovableModelEntity_EnableWeakPointer::Write_t(strm);
     
     strm->WriteID_t(CChunkID(ID_PARAMETRIC_PARTICLES));
 
@@ -547,6 +552,16 @@ functions:
     _pNetwork->ga_sesSessionState.ses_ulRandomSeed = prevRandom;
   }
 
+  void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)
+  {
+    CMovableModelEntity::SetPlacement_internal(plNew, mRotation, bNear);
+    if (_bWorldEditorApp)
+    {
+      End();
+      Initialize();
+    }
+  }
+
 procedures:
   Active()
   {
@@ -677,6 +692,34 @@ procedures:
 
     if (m_bActive) {
       Presimulate();
+    }
+
+    if (_bWorldEditorApp)
+    {
+      if (m_penHeightMap) {
+        ((AutoHeightMap*)m_penHeightMap.ep_pen)->p_parent = this;
+      }
+      if (m_penVelocity) {
+        ((ParticleVelocity*)m_penVelocity.ep_pen)->p_parent = this;
+      }
+      if (m_penRotation) {
+        ((ParticleRotation*)m_penRotation.ep_pen)->p_parent = this;
+      }
+      if (m_penSpawnerShape) {
+        switch (m_penSpawnerShape->GetClass()->ec_pdecDLLClass->dec_iID)
+        {
+        case 4243:
+          ((SpawnShapeBox*)m_penSpawnerShape.ep_pen)->p_parent = this;
+          break;
+        case 4244:
+          ((SpawnShapeSphere*)m_penSpawnerShape.ep_pen)->p_parent = this;
+          break;
+        case 4245:
+          ((SpawnShapeCylinder*)m_penSpawnerShape.ep_pen)->p_parent = this;
+          break;
+        default: break;
+        }
+      }
     }
     
     autowait(0.1f);

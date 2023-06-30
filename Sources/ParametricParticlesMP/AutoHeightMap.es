@@ -4,7 +4,7 @@
 #include "Particles.h"
 %}
 
-class AutoHeightMap : CEntity {
+class AutoHeightMap : CEntity_EnableWeakPointer {
 name "AutoHeightMap";
 thumbnail "Thumbnails\\AutoHeightMap.tbn";
 features "HasName", "IsTargetable";
@@ -21,6 +21,10 @@ properties:
   9 INDEX m_xSteps = 1,
  10 INDEX m_zSteps = 1,
  11 CEntityPointer m_penNext "Next height map (chained)",
+
+{
+  WeakPointer p_parent;
+}
 
 components:
   1 model MODEL_BOX "Models\\Editor\\ParametricParticles.mdl",
@@ -180,6 +184,24 @@ functions:
     GenerateHeightmap();
   }
 
+  void Read_t(CTStream* strm)
+  {
+    CEntity::Read_t(strm);
+    p_parent.Read(this, strm);
+  }
+
+  void Write_t(CTStream* strm)
+  {
+    CEntity::Write_t(strm);
+    p_parent.Write(strm);
+  }
+
+  void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)
+  {
+    CEntity::SetPlacement_internal(plNew, mRotation, bNear);
+    ReinitParent(this);
+  }
+
 procedures:
   Main()
   {
@@ -204,5 +226,10 @@ procedures:
     ModelChangeNotify();
 
     GenerateHeightmap();
+    
+    ReinitParent(this);
+    if (_bWorldEditorApp && m_penNext) {
+      ((AutoHeightMap*)m_penNext.ep_pen)->p_parent = this;
+    }
   }
 };

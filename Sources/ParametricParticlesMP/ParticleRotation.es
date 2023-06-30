@@ -4,7 +4,7 @@
 #include "Particles.h"
 %}
 
-class ParticleRotation : CEntity {
+class ParticleRotation : CEntity_EnableWeakPointer {
 name "ParticleRotation";
 thumbnail "Thumbnails\\ParticleRotation.tbn";
 features "HasName", "IsTargetable";
@@ -21,6 +21,7 @@ properties:
 
 {
   CStaticArray<FLOAT> speedStretch;
+  WeakPointer p_parent;
 }
 
 components:
@@ -38,9 +39,16 @@ functions:
   }
 
   void Read_t(CTStream* strm)
-  { 
+  {
     CEntity::Read_t(strm);
+    p_parent.Read(this, strm);
     RecacheGraphs();
+  }
+
+  void Write_t(CTStream* strm)
+  {
+    CEntity::Write_t(strm);
+    p_parent.Write(strm);
   }
 
   BOOL IsTargetValid(SLONG slPropertyOffset, CEntity* penTarget)
@@ -74,5 +82,10 @@ procedures:
     
     EditGraphVariable(this, m_speedStretchEdit, m_speedStretch);
     RecacheGraphs();
+    
+    ReinitParent(this);
+    if (_bWorldEditorApp && m_penNext) {
+      ((ParticleRotation*)m_penNext.ep_pen)->p_parent = this;
+    }
   }
 };

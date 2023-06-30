@@ -1,6 +1,7 @@
 4243
 %{
 #include "StdH.h"
+#include "Particles.h"
 %}
 
 class SpawnShapeBox : CEntity {
@@ -16,6 +17,10 @@ properties:
   5 FLOAT m_sizeXinner "Inner Size X" = 0.0f,
   6 FLOAT m_sizeYinner "Inner Size Y" = 0.0f,
   7 FLOAT m_sizeZinner "Inner Size Z" = 0.0f,
+
+{
+  WeakPointer p_parent;
+}
 
 components:
   1 model MODEL_BOX "Models\\Editor\\ParametricParticles.mdl",
@@ -178,6 +183,24 @@ functions:
     m_sizeZinner *= fStretch;
   }
 
+  void Read_t(CTStream* strm)
+  {
+    CEntity::Read_t(strm);
+    p_parent.Read(this, strm);
+  }
+
+  void Write_t(CTStream* strm)
+  {
+    CEntity::Write_t(strm);
+    p_parent.Write(strm);
+  }
+
+  void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)
+  {
+    CEntity::SetPlacement_internal(plNew, mRotation, bNear);
+    ReinitParent(this);
+  }
+
 procedures:
   Main()
   {
@@ -210,5 +233,7 @@ procedures:
     GetModelObject()->StretchSingleModel(FLOAT3D(m_sizeX, m_sizeY, m_sizeZ));
 
     ModelChangeNotify();
+    
+    ReinitParent(this);
   }
 };
