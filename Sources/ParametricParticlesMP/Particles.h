@@ -80,15 +80,9 @@ BOOL EnsureNoLoops(const TClass* pthis, const TClass* pthat)
 template<typename TClass>
 void ReinitParent(TClass* self)
 {
-  if (_bWorldEditorApp)
-  {
-    CEntity* parent = self->p_parent.Get();
-    if (parent)
-    {
-      parent->End();
-      parent->Initialize();
-    }
-  }
+  ReinitParent(self->p_parent, self);
 }
+
+void ReinitParent(WeakPointer& p_parent, CEntity* self);
 
 #endif // PARAMETRIC_PARTICLES_42_H

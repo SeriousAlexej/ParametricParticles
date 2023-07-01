@@ -1,5 +1,6 @@
 #include "StdH.h"
 #include "Particles.h"
+#include "AutoHeightMap.h"
 #include "ParametricParticles.h"
 #include "SpawnShapeBox.h"
 #include "SpawnShapeSphere.h"
@@ -511,6 +512,53 @@ int Particle::CompareDistance(const void* lhs, const void* rhs)
   const FLOAT distRhs = (g_viewerLerpedPositionForComparison - posRhs)%(g_projectionZAxis);
   
   return FloatToInt((distRhs - distLhs) * 1000);
+}
+
+void ReinitParent(WeakPointer& p_parent, CEntity* self)
+{
+  CEntity* parent = p_parent.Get();
+  if (!_bWorldEditorApp || !parent)
+    return;
+
+  bool ok = true;
+  switch (parent->GetClass()->ec_pdecDLLClass->dec_iID)
+  {
+  case 4242:
+    switch (self->GetClass()->ec_pdecDLLClass->dec_iID)
+    {
+    case 4246:
+      ok = ((ParametricParticles*)parent)->m_penRotation.ep_pen == self;
+      break;
+    case 4247:
+      ok = ((ParametricParticles*)parent)->m_penVelocity.ep_pen == self;
+      break;
+    case 4248:
+      ok = ((ParametricParticles*)parent)->m_penHeightMap.ep_pen == self;
+      break;
+    default:
+      ok = ((ParametricParticles*)parent)->m_penSpawnerShape.ep_pen == self;
+      break;
+    }
+    break;
+  case 4246:
+    ok = ((ParticleRotation*)parent)->m_penNext.ep_pen == self;
+    break;
+  case 4247:
+    ok = ((ParticleVelocity*)parent)->m_penNext.ep_pen == self;
+    break;
+  case 4248:
+    ok = ((AutoHeightMap*)parent)->m_penNext.ep_pen == self;
+    break;
+  default: break;
+  }
+
+  if (ok)
+  {
+    parent->End();
+    parent->Initialize();
+  } else {
+    p_parent = NULL;
+  }
 }
 
 extern BOOL g_parentIsPredictor = TRUE;
