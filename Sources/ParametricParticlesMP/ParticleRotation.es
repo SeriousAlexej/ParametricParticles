@@ -58,7 +58,7 @@ functions:
       if (!penTarget) {
         return TRUE;
       }
-      if (penTarget->GetClass()->ec_pdecDLLClass->dec_iID == GetClass()->ec_pdecDLLClass->dec_iID) {
+      if (ENTITY_ID(penTarget) == ENTITY_ID(this)) {
         return EnsureNoLoops(this, (const ParticleRotation*)penTarget);
       }
       return FALSE;
