@@ -6,8 +6,15 @@
 #define DECL_DLL __declspec(dllexport)
 #include "ParametricParticlesMP/WeakPointer.h"
 
-typedef EnableWeakPointer<CMovableModelEntity> CMovableModelEntity_EnableWeakPointer;
-#define CMovableModelEntity_EnableWeakPointer_DLLClass CMovableModelEntity_DLLClass
+bool InWED();
 
-typedef EnableWeakPointer<CEntity> CEntity_EnableWeakPointer;
-#define CEntity_EnableWeakPointer_DLLClass CEntity_DLLClass
+#define ID_ParametricParticles 4242
+#define ID_SpawnShapeBox       4243
+#define ID_SpawnShapeSphere    4244
+#define ID_SpawnShapeCylinder  4245
+#define ID_ParticleRotation    4246
+#define ID_ParticleVelocity    4247
+#define ID_AutoHeightMap       4248
+#define ID_SpawnShapeBase      4249
+
+#define ENTITY_ID(entity) entity->GetClass()->ec_pdecDLLClass->dec_iID

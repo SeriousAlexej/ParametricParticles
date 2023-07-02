@@ -4,7 +4,7 @@
 #include "Particles.h"
 %}
 
-class AutoHeightMap : CEntity_EnableWeakPointer {
+class AutoHeightMap : CRationalEntity_EnableWeakPointer {
 name "AutoHeightMap";
 thumbnail "Thumbnails\\AutoHeightMap.tbn";
 features "HasName", "IsTargetable";
@@ -228,7 +228,7 @@ procedures:
     GenerateHeightmap();
     
     ReinitParent(this);
-    if (_bWorldEditorApp && m_penNext) {
+    if (InWED() && m_penNext) {
       ((AutoHeightMap*)m_penNext.ep_pen)->p_parent = this;
     }
   }

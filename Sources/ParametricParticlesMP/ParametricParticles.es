@@ -49,7 +49,7 @@ enum eParticlePlacement
   1 PP_RELATIVE "Relative",
 };
 
-class ParametricParticles : CMovableModelEntity_EnableWeakPointer
+class ParametricParticles : CRationalEntity_EnableWeakPointer
 {
 name "ParametricParticles";
 thumbnail "Thumbnails\\ParametricParticles.tbn";
@@ -130,7 +130,7 @@ functions:
     } else if (slPropertyOffset == offsetof(ParametricParticles, m_colorAnimation)) {
       return m_colorAnimationObject.GetData();
     }
-    return CMovableModelEntity::GetAnimData(slPropertyOffset);
+    return CRationalEntity_EnableWeakPointer::GetAnimData(slPropertyOffset);
   }
 
   void RecacheArrays()
@@ -213,7 +213,7 @@ functions:
       if (!penTarget) {
         return TRUE;
       }
-      return (penTarget->GetClass()->ec_pdecDLLClass->dec_iID == 4248) ? TRUE : FALSE;
+      return (ENTITY_ID(penTarget) == ID_AutoHeightMap) ? TRUE : FALSE;
     }
 
     if (slPropertyOffset == offsetof(ParametricParticles, m_penVelocity))
@@ -221,7 +221,7 @@ functions:
       if (!penTarget) {
         return TRUE;
       }
-      return (penTarget->GetClass()->ec_pdecDLLClass->dec_iID == 4247) ? TRUE : FALSE;
+      return (ENTITY_ID(penTarget) == ID_ParticleVelocity) ? TRUE : FALSE;
     }
 
     if (slPropertyOffset == offsetof(ParametricParticles, m_penRotation))
@@ -229,7 +229,7 @@ functions:
       if (!penTarget) {
         return TRUE;
       }
-      return (penTarget->GetClass()->ec_pdecDLLClass->dec_iID == 4246) ? TRUE : FALSE;
+      return (ENTITY_ID(penTarget) == ID_ParticleRotation) ? TRUE : FALSE;
     }
     
     if (slPropertyOffset == offsetof(ParametricParticles, m_penSpawnerShape))
@@ -237,22 +237,37 @@ functions:
       if (!penTarget) {
         return TRUE;
       }
-      switch (penTarget->GetClass()->ec_pdecDLLClass->dec_iID)
+      switch (ENTITY_ID(penTarget))
       {
-      case 4243:
-      case 4244:
-      case 4245:
+      case ID_SpawnShapeBox:
+      case ID_SpawnShapeSphere:
+      case ID_SpawnShapeCylinder:
         return TRUE;
       }
       return FALSE;
     }
 
-    return CMovableModelEntity::IsTargetValid(slPropertyOffset, penTarget);
+    return CRationalEntity_EnableWeakPointer::IsTargetValid(slPropertyOffset, penTarget);
   }
 
   void Read_t(CTStream* strm)
   { 
-    CMovableModelEntity_EnableWeakPointer::Read_t(strm);
+    CRationalEntity_EnableWeakPointer::Read_t(strm);
+
+    // leftover from CMovableModelEntity
+    if (strm->PeekID_t() == CChunkID("MENT"))
+    {
+      strm->ExpectID_t("MENT");
+      INDEX dummy;
+      INDEX dummy2;
+      (*strm) >> dummy;
+      (*strm) >> dummy;
+      for(INDEX i = 0; i < dummy; ++i) {
+        (*strm) >> dummy2;
+      }
+      (*strm) >> dummy;
+    }
+
     RecacheArrays();
     
     strm->ExpectID_t(ID_PARAMETRIC_PARTICLES);
@@ -288,7 +303,7 @@ functions:
   
   void Write_t(CTStream* strm)
   {
-    CMovableModelEntity_EnableWeakPointer::Write_t(strm);
+    CRationalEntity_EnableWeakPointer::Write_t(strm);
     
     strm->WriteID_t(CChunkID(ID_PARAMETRIC_PARTICLES));
 
@@ -554,8 +569,8 @@ functions:
 
   void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)
   {
-    CMovableModelEntity::SetPlacement_internal(plNew, mRotation, bNear);
-    if (_bWorldEditorApp)
+    CRationalEntity_EnableWeakPointer::SetPlacement_internal(plNew, mRotation, bNear);
+    if (InWED())
     {
       End();
       Initialize();
@@ -672,11 +687,6 @@ procedures:
     } else {
       SetFlags(GetFlags() & ~ENF_BACKGROUND);
     }
-    
-    // apparently some conditional hack with staying in
-    // list of movers - taken from default ParticlesHolder
-    en_fGravityA = 30.0f;
-    GetPitchDirection(-90.0f, en_vGravityDir);
 
     AdjustProperties();
 
@@ -694,7 +704,7 @@ procedures:
       Presimulate();
     }
 
-    if (_bWorldEditorApp)
+    if (InWED())
     {
       if (m_penHeightMap) {
         ((AutoHeightMap*)m_penHeightMap.ep_pen)->p_parent = this;
@@ -706,19 +716,7 @@ procedures:
         ((ParticleRotation*)m_penRotation.ep_pen)->p_parent = this;
       }
       if (m_penSpawnerShape) {
-        switch (m_penSpawnerShape->GetClass()->ec_pdecDLLClass->dec_iID)
-        {
-        case 4243:
-          ((SpawnShapeBox*)m_penSpawnerShape.ep_pen)->p_parent = this;
-          break;
-        case 4244:
-          ((SpawnShapeSphere*)m_penSpawnerShape.ep_pen)->p_parent = this;
-          break;
-        case 4245:
-          ((SpawnShapeCylinder*)m_penSpawnerShape.ep_pen)->p_parent = this;
-          break;
-        default: break;
-        }
+        ((SpawnShapeBase*)m_penSpawnerShape.ep_pen)->p_parent = this;
       }
     }
     

@@ -4,7 +4,9 @@
 #include "Particles.h"
 %}
 
-class SpawnShapeSphere : CEntity {
+uses "SpawnShapeBase";
+
+class SpawnShapeSphere : SpawnShapeBase {
 name "SpawnShapeSphere";
 thumbnail "Thumbnails\\SpawnShapeSphere.tbn";
 features "HasName", "IsTargetable";
@@ -13,10 +15,6 @@ properties:
   1 CTString m_strName "Name" 'N' = "Spawn shape Sphere",
   2 FLOAT m_diameter "Diameter" 'D' = 1.0f,
   3 FLOAT m_diameterInner "Inner Diameter" = 0.0f,
-
-{
-  WeakPointer p_parent;
-}
 
 components:
   1 model MODEL_SPHERE "Models\\Editor\\SpawnShapeSphere.mdl",
@@ -48,18 +46,6 @@ functions:
   {
     m_diameter *= fStretch;
     m_diameterInner *= fStretch;
-  }
-
-  void Read_t(CTStream* strm)
-  {
-    CEntity::Read_t(strm);
-    p_parent.Read(this, strm);
-  }
-
-  void Write_t(CTStream* strm)
-  {
-    CEntity::Write_t(strm);
-    p_parent.Write(strm);
   }
 
   void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)

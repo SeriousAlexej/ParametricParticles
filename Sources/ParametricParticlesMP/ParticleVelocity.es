@@ -4,7 +4,7 @@
 #include "Particles.h"
 %}
 
-class ParticleVelocity : CEntity_EnableWeakPointer {
+class ParticleVelocity : CRationalEntity_EnableWeakPointer {
 name "ParticleVelocity";
 thumbnail "Thumbnails\\ParticleVelocity.tbn";
 features "HasName", "IsTargetable";
@@ -103,7 +103,7 @@ procedures:
     RecacheGraphs();
     
     ReinitParent(this);
-    if (_bWorldEditorApp && m_penNext) {
+    if (InWED() && m_penNext) {
       ((ParticleVelocity*)m_penNext.ep_pen)->p_parent = this;
     }
   }

@@ -11,7 +11,7 @@ WeakPointer::WeakPointer()
 WeakPointer::~WeakPointer()
 {
   if (mp_entity)
-    dynamic_cast<WeakPointerReferable*>(mp_entity)->RemWeakRef(*this);
+    static_cast<CRationalEntity_EnableWeakPointer*>(mp_entity)->RemWeakRef(*this);
 }
 
 WeakPointer& WeakPointer::operator=(CEntity* entity)
@@ -20,10 +20,10 @@ WeakPointer& WeakPointer::operator=(CEntity* entity)
     return *this;
 
   if (mp_entity)
-    dynamic_cast<WeakPointerReferable*>(mp_entity)->RemWeakRef(*this);
+    static_cast<CRationalEntity_EnableWeakPointer*>(mp_entity)->RemWeakRef(*this);
   mp_entity = NULL;
 
-  WeakPointerReferable* wpr = dynamic_cast<WeakPointerReferable*>(entity);
+  CRationalEntity_EnableWeakPointer* wpr = static_cast<CRationalEntity_EnableWeakPointer*>(entity);
   if (wpr)
   {
     mp_entity = entity;
@@ -62,18 +62,18 @@ void WeakPointer::Read(CEntity* self, CTStream* strm)
 
 /*****************************************************************/
 
-WeakPointerReferable::WeakPointerReferable()
+CRationalEntity_EnableWeakPointer::CRationalEntity_EnableWeakPointer()
 {
   m_references.SetAllocationStep(5);
 }
 
-WeakPointerReferable::~WeakPointerReferable()
+CRationalEntity_EnableWeakPointer::~CRationalEntity_EnableWeakPointer()
 {
   while (m_references.Count() > 0)
     RemWeakRef(*m_references[0]);
 }
 
-void WeakPointerReferable::AddWeakRef(WeakPointer& ptr)
+void CRationalEntity_EnableWeakPointer::AddWeakRef(WeakPointer& ptr)
 {
   for (INDEX i = 0; i < m_references.Count(); ++i)
     if (m_references[i] == &ptr)
@@ -81,7 +81,7 @@ void WeakPointerReferable::AddWeakRef(WeakPointer& ptr)
   m_references.Push() = &ptr;
 }
 
-void WeakPointerReferable::RemWeakRef(WeakPointer& ptr)
+void CRationalEntity_EnableWeakPointer::RemWeakRef(WeakPointer& ptr)
 {
   if (m_references.Count() == 0)
     return;

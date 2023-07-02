@@ -12,16 +12,16 @@ public:
   void Read(CEntity* self, CTStream* strm);
 
 private:
-  friend class WeakPointerReferable;
+  friend class CRationalEntity_EnableWeakPointer;
 
   CEntity* mp_entity;
 };
 
-class WeakPointerReferable
+class CRationalEntity_EnableWeakPointer : public CRationalEntity
 {
 public:
-  WeakPointerReferable();
-  ~WeakPointerReferable();
+  CRationalEntity_EnableWeakPointer();
+  ~CRationalEntity_EnableWeakPointer();
 
 private:
   friend class WeakPointer;
@@ -33,9 +33,6 @@ protected:
   CStaticStackArray<WeakPointer*> m_references;
 };
 
-template<typename TBase>
-class EnableWeakPointer : public TBase, public WeakPointerReferable
-{
-};
+#define CRationalEntity_EnableWeakPointer_DLLClass CRationalEntity_DLLClass
 
 #endif // WEAK_POINTER_42_H

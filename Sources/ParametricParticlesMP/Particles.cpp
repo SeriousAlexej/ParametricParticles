@@ -276,23 +276,9 @@ void Particle::Create(ParametricParticles* parent)
   additionalRotation = 0.0f;
 
   if (parent->m_penSpawnerShape)
-  {
-    switch (parent->m_penSpawnerShape->GetClass()->ec_pdecDLLClass->dec_iID)
-    {
-    case 4243:
-      position = ((SpawnShapeBox*)&*parent->m_penSpawnerShape)->GeneratePosition();
-      break;
-    case 4244:
-      position = ((SpawnShapeSphere*)&*parent->m_penSpawnerShape)->GeneratePosition();
-      break;
-    case 4245:
-      position = ((SpawnShapeCylinder*)&*parent->m_penSpawnerShape)->GeneratePosition();
-      break;
-    default: break;
-    }
-  } else {
+    position = ((SpawnShapeBase*)&*parent->m_penSpawnerShape)->GeneratePosition();
+  else
     position = parent->GetPlacement().pl_PositionVector;
-  }
 
   if (parent->m_particlePlacement == PP_RELATIVE)
     position = (position - parent->GetPlacement().pl_PositionVector) * (!parent->GetRotationMatrix());
@@ -517,22 +503,22 @@ int Particle::CompareDistance(const void* lhs, const void* rhs)
 void ReinitParent(WeakPointer& p_parent, CEntity* self)
 {
   CEntity* parent = p_parent.Get();
-  if (!_bWorldEditorApp || !parent)
+  if (!InWED() || !parent)
     return;
 
   bool ok = true;
-  switch (parent->GetClass()->ec_pdecDLLClass->dec_iID)
+  switch (ENTITY_ID(parent))
   {
-  case 4242:
-    switch (self->GetClass()->ec_pdecDLLClass->dec_iID)
+  case ID_ParametricParticles:
+    switch (ENTITY_ID(self))
     {
-    case 4246:
+    case ID_ParticleRotation:
       ok = ((ParametricParticles*)parent)->m_penRotation.ep_pen == self;
       break;
-    case 4247:
+    case ID_ParticleVelocity:
       ok = ((ParametricParticles*)parent)->m_penVelocity.ep_pen == self;
       break;
-    case 4248:
+    case ID_AutoHeightMap:
       ok = ((ParametricParticles*)parent)->m_penHeightMap.ep_pen == self;
       break;
     default:
@@ -540,13 +526,13 @@ void ReinitParent(WeakPointer& p_parent, CEntity* self)
       break;
     }
     break;
-  case 4246:
+  case ID_ParticleRotation:
     ok = ((ParticleRotation*)parent)->m_penNext.ep_pen == self;
     break;
-  case 4247:
+  case ID_ParticleVelocity:
     ok = ((ParticleVelocity*)parent)->m_penNext.ep_pen == self;
     break;
-  case 4248:
+  case ID_AutoHeightMap:
     ok = ((AutoHeightMap*)parent)->m_penNext.ep_pen == self;
     break;
   default: break;

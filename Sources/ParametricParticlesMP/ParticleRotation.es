@@ -4,7 +4,7 @@
 #include "Particles.h"
 %}
 
-class ParticleRotation : CEntity_EnableWeakPointer {
+class ParticleRotation : CRationalEntity_EnableWeakPointer {
 name "ParticleRotation";
 thumbnail "Thumbnails\\ParticleRotation.tbn";
 features "HasName", "IsTargetable";
@@ -84,7 +84,7 @@ procedures:
     RecacheGraphs();
     
     ReinitParent(this);
-    if (_bWorldEditorApp && m_penNext) {
+    if (InWED() && m_penNext) {
       ((ParticleRotation*)m_penNext.ep_pen)->p_parent = this;
     }
   }

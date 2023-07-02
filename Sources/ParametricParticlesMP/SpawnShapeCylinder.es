@@ -4,7 +4,9 @@
 #include "Particles.h"
 %}
 
-class SpawnShapeCylinder : CEntity {
+uses "SpawnShapeBase";
+
+class SpawnShapeCylinder : SpawnShapeBase {
 name "SpawnShapeCylinder";
 thumbnail "Thumbnails\\SpawnShapeCylinder.tbn";
 features "HasName", "IsTargetable";
@@ -15,10 +17,6 @@ properties:
   3 FLOAT m_height "Height" 'H' = 1.0f,
   4 FLOAT m_diameterInner "Inner Diameter" = 0.0f,
   5 FLOAT m_heightInner "Inner Height" = 0.0f,
-
-{
-  WeakPointer p_parent;
-}
 
 components:
   1 model MODEL_CYLINDER "Models\\Editor\\SpawnShapeCylinder.mdl",
@@ -65,18 +63,6 @@ functions:
     m_height *= fStretch;
     m_diameterInner *= fStretch;
     m_heightInner *= fStretch;
-  }
-
-  void Read_t(CTStream* strm)
-  {
-    CEntity::Read_t(strm);
-    p_parent.Read(this, strm);
-  }
-
-  void Write_t(CTStream* strm)
-  {
-    CEntity::Write_t(strm);
-    p_parent.Write(strm);
   }
 
   void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)
