@@ -18,3 +18,4 @@ bool InWED();
 #define ID_SpawnShapeBase      4249
 
 #define ENTITY_ID(entity) entity->GetClass()->ec_pdecDLLClass->dec_iID
+#define ANCESTOR_ID(entity) entity->GetClass()->ec_pdecDLLClass->dec_pdecBase->dec_iID

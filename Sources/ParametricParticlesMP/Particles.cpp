@@ -275,15 +275,9 @@ void Particle::Create(ParametricParticles* parent)
   lastRotation = rotation;
   additionalRotation = 0.0f;
 
-  if (parent->m_penSpawnerShape)
-    position = ((SpawnShapeBase*)&*parent->m_penSpawnerShape)->GeneratePosition();
-  else
-    position = parent->GetPlacement().pl_PositionVector;
-
-  if (parent->m_particlePlacement == PP_RELATIVE)
-    position = (position - parent->GetPlacement().pl_PositionVector) * (!parent->GetRotationMatrix());
-
+  position = parent->GenerateSpawnPosition();
   lastPosition = position;
+
   if (parent->m_textureType == TT_RANDOM_FRAME) {
     tileRow = parent->IRnd() % parent->m_iTextureNumRows;
     tileCol = parent->IRnd() % parent->m_iTextureNumCols;

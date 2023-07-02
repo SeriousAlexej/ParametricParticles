@@ -26,6 +26,11 @@ components:
   3 model MODEL_BASE "Models\\Editor\\SpawnShapeBase.mdl",
 
 functions:
+  FLOAT GetVolume() const
+  {
+    return (m_sizeX * m_sizeY * m_sizeZ) - (m_sizeXinner * m_sizeYinner * m_sizeZinner);
+  }
+
   FLOAT3D GeneratePosition()
   {
     FLOAT3D pos;
@@ -181,12 +186,6 @@ functions:
     m_sizeZinner *= fStretch;
   }
 
-  void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)
-  {
-    CEntity::SetPlacement_internal(plNew, mRotation, bNear);
-    ReinitParent(this);
-  }
-
 procedures:
   Main()
   {
@@ -219,7 +218,7 @@ procedures:
     GetModelObject()->StretchSingleModel(FLOAT3D(m_sizeX, m_sizeY, m_sizeZ));
 
     ModelChangeNotify();
-    
-    ReinitParent(this);
+
+    ValidateNextPointer();
   }
 };

@@ -22,6 +22,14 @@ components:
   3 model MODEL_BASE "Models\\Editor\\SpawnShapeBase.mdl",
 
 functions:
+  FLOAT GetVolume() const
+  {
+    const FLOAT radius = m_diameter * 0.5f;
+    const FLOAT radiusInner = m_diameterInner * 0.5f;
+    const FLOAT fourThirds = 4.0f / 3.0f;
+    return (fourThirds * radius * radius * radius * PI) - (fourThirds * radiusInner * radiusInner * radiusInner * PI);
+  }
+
   FLOAT3D GeneratePosition()
   {
     FLOAT theta = FRnd() * 2.0f * PI;
@@ -46,12 +54,6 @@ functions:
   {
     m_diameter *= fStretch;
     m_diameterInner *= fStretch;
-  }
-
-  void SetPlacement_internal(const CPlacement3D& plNew, const FLOATmatrix3D& mRotation, BOOL bNear)
-  {
-    CEntity::SetPlacement_internal(plNew, mRotation, bNear);
-    ReinitParent(this);
   }
 
 procedures:
@@ -83,6 +85,6 @@ procedures:
 
     ModelChangeNotify();
     
-    ReinitParent(this);
+    ValidateNextPointer();
   }
 };

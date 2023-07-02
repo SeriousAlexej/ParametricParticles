@@ -20,6 +20,8 @@ public:
 };
 %}
 
+uses "SpawnShapeBase";
+
 enum eParticleBlendType
 {
   0 ePBT_BLEND "Blend",
@@ -71,7 +73,7 @@ properties:
  13 FLOAT m_fParticleLifetimeMax "Particle lifetime max" = 6.0f,
  14 INDEX m_iTextureNumRows "Texture rows" = 1,
  15 INDEX m_iTextureNumCols "Texture columns" = 1,
- 16 CEntityPointer m_penSpawnerShape "Spawner shape",
+ 16 CEntityPointer m_penSpawnerShape "Spawner shape (chained)",
  17 enum eParticleBlendType m_blendType "Blend type" = ePBT_BLEND,
  18 enum eFlat m_flatType "Flat type" = FLAT_FULL,
  19 BOOL m_editAlpha "Particle alpha..." = FALSE,
@@ -117,6 +119,8 @@ properties:
   CStaticArray<FLOAT2D> alphaCache;
   CStaticArray<FLOAT2D> stretchXCache;
   CStaticArray<FLOAT2D> stretchYCache;
+  CStaticArray<FLOAT> spawnShapesProbabilities;
+  CStaticArray<SpawnShapeBase*> spawnShapesCache;
 }
 
 components:
@@ -133,8 +137,65 @@ functions:
     return CRationalEntity_EnableWeakPointer::GetAnimData(slPropertyOffset);
   }
 
+  void EnsureSpawnShapesCache()
+  {
+    if (!m_penSpawnerShape || spawnShapesCache.Count() > 0) {
+      return;
+    }
+
+    INDEX numShapes = 0;
+    FLOAT totalVolume = 0.0f;
+    SpawnShapeBase* shape = (SpawnShapeBase*)m_penSpawnerShape.ep_pen;
+    while (shape)
+    {
+      totalVolume += shape->GetVolume();
+      shape = (SpawnShapeBase*)shape->m_penNext.ep_pen;
+      ++numShapes;
+    }
+
+    INDEX i = 0;
+    shape = (SpawnShapeBase*)m_penSpawnerShape.ep_pen;
+    spawnShapesCache.New(numShapes);
+    spawnShapesProbabilities.New(numShapes);
+    while (shape)
+    {
+      spawnShapesCache[i] = shape;
+      spawnShapesProbabilities[i] = shape->GetVolume() / totalVolume;
+      if (i > 0) {
+        spawnShapesProbabilities[i] += spawnShapesProbabilities[i - 1];
+      }
+      shape = (SpawnShapeBase*)shape->m_penNext.ep_pen;
+      ++i;
+    }
+  }
+
+  FLOAT3D GenerateSpawnPosition()
+  {
+    FLOAT3D position;
+
+    if (m_penSpawnerShape)
+    {
+      const FLOAT probability = FRnd();
+      INDEX i = 0;
+      while (probability > spawnShapesProbabilities[i] && i < spawnShapesProbabilities.Count() - 1) {
+        ++i;
+      }
+      position = spawnShapesCache[i]->GeneratePosition();
+    } else {
+      position = GetPlacement().pl_PositionVector;
+    }
+
+    if (m_particlePlacement == PP_RELATIVE) {
+      position = (position - GetPlacement().pl_PositionVector) * (!GetRotationMatrix());
+    }
+
+    return position;
+  }
+
   void RecacheArrays()
   {
+    spawnShapesProbabilities.Clear();
+    spawnShapesCache.Clear();
     particles.Clear();
     particles.New(m_maxParticles);
     renderParticles.Clear();
@@ -391,6 +452,7 @@ functions:
 
     if (m_bActive && _pTimer->CurrentTick() >= m_fLastSpawnTime + m_fSpawnInterval)
     {
+      EnsureSpawnShapesCache();
       m_fLastSpawnTime = _pTimer->CurrentTick();
       const INDEX numToSpawn = m_iSpawnMin + (IRnd() % (m_iSpawnMax - m_iSpawnMin + 1));
       for (INDEX i = 0; i < numToSpawn; ++i)
