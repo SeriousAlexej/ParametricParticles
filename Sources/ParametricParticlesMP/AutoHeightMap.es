@@ -21,6 +21,12 @@ properties:
   9 INDEX m_xSteps = 1,
  10 INDEX m_zSteps = 1,
  11 CEntityPointer m_penNext "Next height map (chained)",
+ 12 BOOL m_fixed "Fixed" = FALSE,
+ 13 BOOL m_fixedPrev = FALSE,
+ 14 FLOAT m_sizeXFixed = 5.0f,
+ 15 FLOAT m_sizeYFixed = 3.0f,
+ 16 FLOAT m_sizeZFixed = 5.0f,
+ 17 FLOAT m_stepFixed = 0.5f,
 
 {
   WeakPointer p_parent;
@@ -181,7 +187,14 @@ functions:
     m_step *= fStretch;
     m_xSteps = m_sizeX / m_step;
     m_zSteps = m_sizeZ / m_step;
-    GenerateHeightmap();
+    m_sizeXFixed *= fStretch;
+    m_sizeYFixed *= fStretch;
+    m_sizeZFixed *= fStretch;
+    m_stepFixed *= fStretch;
+
+    if (!m_fixed) {
+      GenerateHeightmap();
+    }
   }
 
   void Read_t(CTStream* strm)
@@ -205,13 +218,46 @@ functions:
 procedures:
   Main()
   {
-    m_sizeX = ClampDn(m_sizeX, 1.0f);
-    m_sizeY = ClampDn(m_sizeY, 1.0f);
-    m_sizeZ = ClampDn(m_sizeZ, 1.0f);
-    m_step = ClampUp(m_step, Min(Min(m_sizeX, m_sizeY), m_sizeZ));
+    const BOOL pressedFixed = (m_fixed && !m_fixedPrev) ? TRUE : FALSE;
+    if (pressedFixed)
+    {
+      m_sizeXFixed = m_sizeX;
+      m_sizeYFixed = m_sizeY;
+      m_sizeZFixed = m_sizeZ;
+      m_stepFixed = m_step;
+    }
+    else if (m_fixed)
+    {
+      if (m_sizeX != m_sizeXFixed ||
+          m_sizeY != m_sizeYFixed ||
+          m_sizeZ != m_sizeZFixed ||
+          m_step != m_stepFixed)
+      {
+        WarningMessage(
+          "Cannot change size and step of fixed height map!"
+          "\nUncheck 'Fixed' property to proceed.");
+        m_sizeX = m_sizeXFixed;
+        m_sizeY = m_sizeYFixed;
+        m_sizeZ = m_sizeZFixed;
+        m_step = m_stepFixed;
+      }
+    }
+    else
+    {
+      m_sizeX = ClampDn(m_sizeX, 1.0f);
+      m_sizeY = ClampDn(m_sizeY, 1.0f);
+      m_sizeZ = ClampDn(m_sizeZ, 1.0f);
+      m_step = ClampUp(m_step, Min(Min(m_sizeX, m_sizeY), m_sizeZ));
+      m_xSteps = m_sizeX / m_step;
+      m_zSteps = m_sizeZ / m_step;
+    }
+    m_fixedPrev = m_fixed;
+    if (m_fixed && m_recalculate) {
+      WarningMessage(
+        "Cannot recalculate fixed height map!"
+        "\nUncheck 'Fixed' property to proceed.");
+    }
     m_recalculate = FALSE;
-    m_xSteps = m_sizeX / m_step;
-    m_zSteps = m_sizeZ / m_step;
     if (!IsTargetValid(offsetof(AutoHeightMap, m_penNext), m_penNext.ep_pen)) {
       m_penNext = NULL;
     }
@@ -225,7 +271,9 @@ procedures:
     GetModelObject()->StretchModel(FLOAT3D(m_sizeX, m_sizeY, m_sizeZ));
     ModelChangeNotify();
 
-    GenerateHeightmap();
+    if (!m_fixed) {
+      GenerateHeightmap();
+    }
     
     ReinitParent(this);
     if (InWED() && m_penNext) {
