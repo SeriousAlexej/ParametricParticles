@@ -431,7 +431,7 @@ functions:
 
   void UpdateParticles()
   {
-    FLOATaabbox3D box;
+    FLOATaabbox3D box(GetPlacement().pl_PositionVector);
     Particle* particle = lastUsed;
     while (particle)
     {
