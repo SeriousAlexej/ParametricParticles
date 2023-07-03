@@ -132,7 +132,7 @@ Greyed out areas of a graph mean that values within them will have no impact on 
 * **Spawn count max** - maximum possible count of particles that are spawned each **Spawn interval (seconds)**
 * **Spawn count min** - minimum possible count of particles that are spawned each **Spawn interval (seconds)**
 * **Spawn interval (seconds)** - determines how often new particles are spawned. For example, a value of 2 means that new particles are spawned every 2 seconds.
-* **Spawner shape** - optional pointer to an entity, that defines custom spawn area (**SpawnShapeBox** / **SpawnShapeCylinder** / **SpawnShapeSphere**).
+* **Spawner shape (chained)** - optional pointer to a chain of entities, that define custom spawn area (**SpawnShapeBox** / **SpawnShapeCylinder** / **SpawnShapeSphere**).
 * **Texture** - texture to be used for every particle.
 * **Texture animation** - selection of a possible predefined texture animation.
 * **Texture animation FPS** - defines how quickly texture tiles are changed, not related to **Texture animation**! Valid only if **Texture type** is set to *Animated tiles*.
@@ -196,6 +196,8 @@ Multiple velocities can be used by building up a chain of **ParticleVelocity** e
 
 This is an additional entity, representing a box-shaped spawn volume. Particles are spawned uniformly within it.
 
+Multiple spawn shapes of different kind can be used by building up a chain of such entities (**SpawnShapeBox** / **SpawnShapeCylinder** / **SpawnShapeSphere**).
+
 #### Properties
 
 * **Size X** - X size of this box.
@@ -204,6 +206,7 @@ This is an additional entity, representing a box-shaped spawn volume. Particles 
 * **Inner Size X** - X size of inner part of this box, where particles are not allowed to spawn.
 * **Inner Size Y** - Y size of inner part of this box, where particles are not allowed to spawn.
 * **Inner Size Z** - Z size of inner part of this box, where particles are not allowed to spawn.
+* **Next spawner shape (chained)** - a pointer to another spawn shape entity, that should also be used (order is not important, particles are distributed uniformly across all spawn shapes). Loops in chains are not allowed.
 
 ---
 
@@ -212,12 +215,15 @@ This is an additional entity, representing a box-shaped spawn volume. Particles 
 
 This is an additional entity, representing a cylinder-shaped spawn volume. Particles are spawned uniformly within it.
 
+Multiple spawn shapes of different kind can be used by building up a chain of such entities (**SpawnShapeBox** / **SpawnShapeCylinder** / **SpawnShapeSphere**).
+
 #### Properties
 
 * **Diameter** - diameter of this cylinder.
 * **Height** - height of this cylinder.
 * **Inner Diameter** - diameter of inner part of this cylinder, where particles are not allowed to spawn.
 * **Inner Height** - height of inner part of this cylinder, where particles are not allowed to spawn.
+* **Next spawner shape (chained)** - a pointer to another spawn shape entity, that should also be used (order is not important, particles are distributed uniformly across all spawn shapes). Loops in chains are not allowed.
 
 ---
 
@@ -226,10 +232,13 @@ This is an additional entity, representing a cylinder-shaped spawn volume. Parti
 
 This is an additional entity, representing a sphere-shaped spawn volume. Particles are spawned uniformly within it.
 
+Multiple spawn shapes of different kind can be used by building up a chain of such entities (**SpawnShapeBox** / **SpawnShapeCylinder** / **SpawnShapeSphere**).
+
 #### Properties
 
 * **Diameter** - diameter of this sphere.
 * **Inner Diameter** - diameter of inner part of this sphere, where particles are not allowed to spawn.
+* **Next spawner shape (chained)** - a pointer to another spawn shape entity, that should also be used (order is not important, particles are distributed uniformly across all spawn shapes). Loops in chains are not allowed.
 
 ---
 
