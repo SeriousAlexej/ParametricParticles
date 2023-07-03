@@ -242,6 +242,7 @@ Multiple heightmaps can be used for single particle entity by building up a chai
 
 #### Properties
 
+* **Fixed** - if set to *TRUE*, size and step properties will be locked and recalculation will be forbidden.
 * **Next height map (chained)** - a pointer to another **AutoHeightMap** entity, that should also be used. Loops in chains are not allowed.
 * **Recalculate** - a shortcut for discarding old heightmap and calculating a new one.
 * **Size X** - X size of volume for this heightmap.
