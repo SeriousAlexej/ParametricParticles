@@ -782,7 +782,7 @@ procedures:
       }
     }
     
-    autowait(0.1f);
+    autowait(0.3f);
 
     m_presimulated = HasAliveParticles();
 
