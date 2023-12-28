@@ -2,6 +2,12 @@
 
 Advanced particle entity for the *Serious Sam - The Second Encounter 1.07*
 
+<img width="322" height="258" align="left" src="./Images/Outline_BlackHole.gif">
+<img width="322" height="258" align="left" src="./Images/Outline_HappyHappyJoyJoy.gif">
+<img width="322" height="258" align="left" src="./Images/Outline_Pickups.gif">
+<img width="322" height="258" align="left" src="./Images/Outline_SoftVolumetricLighting.png">
+<img width="322" height="258" align="left" src="./Images/Outline_Ghost.gif">
+<img width="322" height="258" align="left" src="./Images/Outline_MissionItems.gif">
 <img width="322" height="258" align="left" src="./Images/Particles_Talos.gif">
 <img width="322" height="258" align="left" src="./Images/Particles_Rain.gif">
 <img width="322" height="258" align="left" src="./Images/Particles_FireSmoke.gif">
@@ -9,12 +15,15 @@ Advanced particle entity for the *Serious Sam - The Second Encounter 1.07*
 <img width="322" height="258" align="left" src="./Images/Particles_Beams.gif">
 <img width="322" height="258" src="./Images/Particles_MovingShower.gif">
 
-## Video Demonstration (YouTube, clickable)
+## Video Demonstrations (YouTube, clickable)
+[![Parametric Particles 1.3 Outline Demo](https://img.youtube.com/vi/3gSYu6rNaN4/maxresdefault.jpg)](https://youtu.be/3gSYu6rNaN4)
+
+---
+
 [![Parametric Particles Demo](https://img.youtube.com/vi/DcomwTeyTDI/maxresdefault.jpg)](https://youtu.be/DcomwTeyTDI)
 
 ---
 
-## 1.1 Update Feature Showcase (YouTube, clickable)
 [![1.1 Update Feature Showcase](https://img.youtube.com/vi/vHMXuQAiwK0/maxresdefault.jpg)](https://youtu.be/vHMXuQAiwK0)
 
 ---
@@ -29,6 +38,7 @@ Advanced particle entity for the *Serious Sam - The Second Encounter 1.07*
    5. [SpawnShapeCylinder](#cylinder)
    6. [SpawnShapeSphere](#sphere)
    7. [AutoHeightMap](#heightmap)
+   8. [Outline](#outline)
 
 ---
 
@@ -259,3 +269,48 @@ Multiple heightmaps can be used for single particle entity by building up a chai
 * **Size Z** - Z size of volume for this heightmap.
 * **Step in meters** - interval at which height values are sampled. Lower number means higher resolution.
 * **Visible** - if set to *TRUE*, calculated heightmap is visualized in *Serious Editor* in form of transparent yellow particles.
+
+---
+
+### Outline<a name="outline"></a>
+<img src="./Images/OutlineTbn.png">
+
+This entity draws an outline effect around the targeted entities. Any targetable entity can have an outline - i.e. moving brushes, models, enemies, weapons, items etc.
+
+#### Gist
+
+Outline can be heavily customized and be either based on contour (expensive) or on a convex hull (cheap). Outline can have multiple ways of calculating its depth and thickness - from real world coordinates to screen based.
+
+With a proper outline effect, it is possible to simulate a wide range of effects - from a simple glowing contour to a smooth volumetric lighting.
+
+#### Events
+
+Following events can be sent to this entity:
+
+* **Activate event** - this event enables outline rendering.
+* **Deactivate event** - this event disables outline rendering.
+
+#### Properties
+
+* **Active** - if *TRUE*, outline is rendered.
+* **Background** - if *TRUE*, outline will be rendered as a part of a background.
+* **Blend type** - defines the blending mode of outline's texture on screen.
+* **Color** - color used for mixed blending of outline's texture on screen.
+* **Color alpha scale...** - edits a looped graph of outline's alpha value multiplier. Useful for making various blinking effects.
+* **Color animation file** - animation file with color keyframes.
+* **Color animation** - determines which animation fomr **Color animation file** will be used.
+* **Depth offset** - defines the distance which will be added to the outline's depth during rendering. Useful when outline should be shifted to the foreground or to the background of the surrounding scene. Applicable only if **Type** property has *average* or *fixed* depth and **Depth testing** is set to *TRUE*.
+* **Depth testing** - if *FALSE*, particle will be visible through walls (and other entities). *TIP:* if you want an outline to always be visible from any sector, place this entity in the background viewer room (but do *NOT* check the **Background** property).
+* **Online help...** - opens up this github page at this particular section.
+* **Outline entitiy XX** - a list of pointers to entities which should have a combined outline. Any kind and mixture of targetable entities is supported - even editor entities and touch fields.
+* **Outline visibility fall-off** - distance at which outline is no longer visible.
+* **Outline visibility hot-spot** - distance at which outline starts to disappear.
+* **Texture** - texture to be used for this outline.
+* **Texture animation** - selection of a possible predefined texture animation.
+* **Thickness** - defines the thickness of outline in either world coordinates or in screen space (depends on the **Type** property).
+* **Thickness scale...** - edits a looped graph of outline's thickness value multiplier. Useful for making growing/shrinking/vibrating effects.
+* **Type** - defines how outline's shape and depth is calculated. *Contour* outlines are the prettiest but also the most expensive CPU-wise. *Convex* outline is much cheaper and is the preferred type for convex shapes and glowing effects, like volumetric lighting, godrays etc.
+* **UV Aspect ratio** - a multiplier for the aspect ratio of selected **Texture**.
+* **UV X Continuous** - defines whether texture should be rendered continuously through the outline's length. Useful when outline texture is animated and moving around.
+* **UV X offset...** - edits a looped graph of UV X coordinate offset. Useful for animating horizontal movement of **Texture** along the outline, i.e. scrolling dashed contour effect etc.
+* **UV Y offset...** - edits a looped graph of UV Y coordinate offset. Useful for animating vertical (to-from entity) movement of **Texture** along the outline, i.e. radiation or absorption effects etc.

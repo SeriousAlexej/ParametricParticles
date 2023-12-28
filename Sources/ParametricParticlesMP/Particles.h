@@ -1,22 +1,8 @@
 #ifndef PARAMETRIC_PARTICLES_42_H
 #define PARAMETRIC_PARTICLES_42_H
-
-#define LIMIT_GRAPH_X 1
-#define LIMIT_GRAPH_Y 2
+#include <ParametricParticlesUtils/ParticlesUtils.h>
 
 class ParametricParticles;
-
-FLOAT GetDiscreteGraphValueSince(const CStaticArray<FLOAT>& graph, FLOAT birthTime, BOOL loop);
-FLOAT GetGraphValueAt(const CStaticArray<FLOAT2D>& graph, FLOAT f);
-void RecacheGraph(CStaticArray<FLOAT2D>& cache, const CTString& graph);
-void RecacheGraphDiscrete(CStaticArray<FLOAT>& cache, const CTString& graph);
-INDEX LowerBound(const CStaticArray<FLOAT2D>& arr, const FLOAT value);
-void EditGraphVariable(const CEntity* self, BOOL& property, CTString& graph, ULONG flags = 0UL);
-
-#if _MSC_VER == 1200
-#define USE_CUSTOM_PARTICLE_PROJECTION
-CProjection3D* Particle_GetProjection();
-#endif
 
 extern BOOL g_parentIsPredictor;
 extern BOOL g_parentRelativePlacement;
@@ -58,24 +44,6 @@ struct Particle
 
   mutable FLOAT additionalRotation;
 };
-
-template<typename TClass>
-BOOL EnsureNoLoops(const TClass* pthis, const TClass* pthat)
-{
-  CStaticStackArray<const CEntity*> visited;
-  visited.Push() = pthis;
-
-  const TClass* toAdd = pthat;
-  while (toAdd)
-  {
-    for (INDEX i = 0; i < visited.Count(); ++i)
-      if (visited[i] == toAdd)
-        return FALSE;
-    visited.Push() = (const CEntity*)toAdd;
-    toAdd = (const TClass*)toAdd->m_penNext.ep_pen;
-  }
-  return TRUE;
-}
 
 template<typename TClass>
 void ReinitParent(TClass* self)

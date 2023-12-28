@@ -9,15 +9,6 @@
 #include "SpawnShapeCylinder.h"
 #include "SpawnShapeSphere.h"
 #define ID_PARAMETRIC_PARTICLES "PPAR"
-
-class COneAnim
-{
-public:
-  NAME oa_Name;
-  TIME oa_SecsPerFrame;
-  INDEX oa_NumberOfFrames;
-  INDEX* oa_FrameIndices;
-};
 %}
 
 uses "SpawnShapeBase";
